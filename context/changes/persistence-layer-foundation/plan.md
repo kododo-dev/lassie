@@ -239,19 +239,19 @@ This is the *first* migration ever created for this project — there's no exist
 
 #### Automated
 
-- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
-- [x] 2.2 `src/Migrations/*_InitialCreate.cs` exists after `dotnet ef migrations add InitialCreate`
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds — db83663
+- [x] 2.2 `src/Migrations/*_InitialCreate.cs` exists after `dotnet ef migrations add InitialCreate` — db83663
 
 #### Manual
 
-- [x] 2.3 `dotnet ef database update` applies cleanly against the local dev database
-- [x] 2.4 `psql` against the local dev database lists `AuditLogs` and `__EFMigrationsHistory`
+- [x] 2.3 `dotnet ef database update` applies cleanly against the local dev database — db83663
+- [x] 2.4 `psql` against the local dev database lists `AuditLogs` and `__EFMigrationsHistory` — db83663
 
 ### Phase 3: Startup auto-migration + production verification
 
 #### Automated
 
-- [ ] 3.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 3.1 `dotnet build src/lassie.csproj` succeeds
 - [ ] 3.2 `.github/workflows/deploy.yml`'s `build-and-push` job passes unchanged
 
 #### Manual
