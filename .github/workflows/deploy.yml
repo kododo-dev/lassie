@@ -43,8 +43,22 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd ${{ secrets.DEPLOY_PATH }}
             sed -i "s/^LASSIE_IMAGE_TAG=.*/LASSIE_IMAGE_TAG=${{ github.sha }}/" .env
             sudo docker compose pull lassie
             sudo docker compose up -d
             sudo docker image prune -f
+
+            echo "Waiting for deployed container to answer through Caddy..."
+            for i in $(seq 1 10); do
+              code=$(curl -s -o /dev/null -w "%{http_code}" https://kododo.dev/lassie/weatherforecast)
+              if [ "$code" != "502" ] && [ "$code" != "000" ]; then
+                echo "Health check passed (HTTP $code)"
+                exit 0
+              fi
+              echo "Attempt $i/10: HTTP $code, retrying in 3s..."
+              sleep 3
+            done
+            echo "Health check failed after deploy (last HTTP $code)"
+            exit 1
