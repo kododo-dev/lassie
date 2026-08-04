@@ -1,0 +1,19 @@
+services:
+  lassie:
+    image: ghcr.io/${GHCR_OWNER}/lassie:${LASSIE_IMAGE_TAG:-latest}
+    container_name: lassie
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_PATHBASE: /lassie
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    networks:
+      - web
+      - internal
+
+networks:
+  web:
+    external: true
+  internal:
+    external: true
