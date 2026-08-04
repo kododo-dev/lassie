@@ -251,11 +251,11 @@ This is the *first* migration ever created for this project — there's no exist
 
 #### Automated
 
-- [x] 3.1 `dotnet build src/lassie.csproj` succeeds
-- [x] 3.2 `.github/workflows/deploy.yml`'s `build-and-push` job passes unchanged
+- [x] 3.1 `dotnet build src/lassie.csproj` succeeds — 216f058
+- [x] 3.2 `.github/workflows/deploy.yml`'s `build-and-push` job passes unchanged — 216f058
 
 #### Manual
 
-- [x] 3.3 Deploy workflow's health check passes after pushing to `main`
-- [x] 3.4 `psql` against the production `lassie` database lists `AuditLogs` and `__EFMigrationsHistory`
-- [x] 3.5 `docker compose logs lassie` on the VPS shows no migration-related errors
+- [x] 3.3 Deploy workflow's health check passes after pushing to `main` — 216f058
+- [x] 3.4 `psql` against the production `lassie` database lists `AuditLogs` and `__EFMigrationsHistory` — 216f058
+- [x] 3.5 `docker compose logs lassie` on the VPS shows no migration-related errors — 216f058
