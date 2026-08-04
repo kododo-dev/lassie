@@ -228,24 +228,24 @@ This is the *first* migration ever created for this project — there's no exist
 
 #### Automated
 
-- [x] 1.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 1.1 `dotnet build src/lassie.csproj` succeeds — 5d140a6
 
 #### Manual
 
-- [x] 1.2 `docker compose -f docker-compose.dev.yml up -d` starts a local Postgres container
-- [x] 1.3 `dotnet run --project src/lassie.csproj` starts without throwing
+- [x] 1.2 `docker compose -f docker-compose.dev.yml up -d` starts a local Postgres container — 5d140a6
+- [x] 1.3 `dotnet run --project src/lassie.csproj` starts without throwing — 5d140a6
 
 ### Phase 2: Audit-history convention + first migration
 
 #### Automated
 
-- [ ] 2.1 `dotnet build src/lassie.csproj` succeeds
-- [ ] 2.2 `src/Migrations/*_InitialCreate.cs` exists after `dotnet ef migrations add InitialCreate`
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 2.2 `src/Migrations/*_InitialCreate.cs` exists after `dotnet ef migrations add InitialCreate`
 
 #### Manual
 
-- [ ] 2.3 `dotnet ef database update` applies cleanly against the local dev database
-- [ ] 2.4 `psql` against the local dev database lists `AuditLogs` and `__EFMigrationsHistory`
+- [x] 2.3 `dotnet ef database update` applies cleanly against the local dev database
+- [x] 2.4 `psql` against the local dev database lists `AuditLogs` and `__EFMigrationsHistory`
 
 ### Phase 3: Startup auto-migration + production verification
 
