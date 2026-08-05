@@ -1,7 +1,7 @@
 ---
 change_id: admin-auth-foundation
 title: Admin authentication foundation (F-02 foundation)
-status: impl_reviewed
+status: implemented
 created: 2026-08-05
 updated: 2026-08-06
 archived_at: null

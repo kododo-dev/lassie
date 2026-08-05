@@ -290,5 +290,5 @@ Second migration ever created for this project (`InitialCreate` and `AddAuditLog
 - [x] 3.3 Local: wrong credentials show generic error, log a warning, set no cookie — c52ace3
 - [x] 3.4 Local: correct credentials log in, session persists across reload — c52ace3
 - [x] 3.5 Local: logout redirects to `/login` and re-gates `/` — c52ace3
-- [x] 3.6 Production: full login/logout cycle works at `kododo.dev/lassie` with correct path-prefixed redirects
-- [x] 3.7 Production: `docker compose logs lassie` shows clean startup and expected login/logout log lines
+- [x] 3.6 Production: full login/logout cycle works at `kododo.dev/lassie` with correct path-prefixed redirects — 0d4351f
+- [x] 3.7 Production: `docker compose logs lassie` shows clean startup and expected login/logout log lines — 0d4351f
