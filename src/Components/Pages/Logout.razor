@@ -10,6 +10,8 @@
     protected override async Task OnInitializedAsync()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        Navigation.NavigateTo("/login", forceLoad: true);
+        // Relative (no leading "/") so this resolves against BaseUri, preserving the
+        // "/lassie" prefix in production instead of jumping to the domain root.
+        Navigation.NavigateTo("login", forceLoad: true);
     }
 }

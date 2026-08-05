@@ -75,7 +75,10 @@
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-        Navigation.NavigateTo("/", forceLoad: true);
+        // A leading "/" is resolved against the domain root, not <base href> — that would
+        // strip the "/lassie" prefix in production. A relative target resolves against
+        // NavigationManager.BaseUri instead, which already reflects the configured prefix.
+        Navigation.NavigateTo("", forceLoad: true);
     }
 
     private sealed class LoginFormModel
