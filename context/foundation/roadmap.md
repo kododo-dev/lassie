@@ -32,7 +32,7 @@ A company that ships its own product to many customer deployments has no central
 | ID   | Change ID                          | Outcome (user can …)                                                                 | Prerequisites | PRD refs                          | Status   |
 | ---- | ----------------------------------- | -------------------------------------------------------------------------------------- | -------------- | ---------------------------------- | -------- |
 | F-01 | `persistence-layer-foundation`      | (foundation) DB connectivity + migration tooling verified end-to-end                   | —              | FR-006 (enabler), Access Control   | done     |
-| F-02 | `admin-auth-foundation`             | (foundation) Admin can authenticate to the panel; unauthenticated requests are rejected | F-01           | FR-011, Access Control             | proposed |
+| F-02 | `admin-auth-foundation`             | (foundation) Admin can authenticate to the panel; unauthenticated requests are rejected | F-01           | FR-011, Access Control             | done     |
 | S-01 | `module-catalog-management`         | Admin can create and edit license module definitions                                   | F-01, F-02     | FR-004                             | proposed |
 | S-02 | `license-creation-and-verification` | Admin creates a license + API key; client app verifies it via the API                  | S-01, F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | proposed |
 | S-03 | `license-edit-with-audit-history`   | Admin edits a license, with prior versions retained for audit                          | S-02, F-01, F-02 | FR-006                             | proposed |
@@ -89,7 +89,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - How is the very first admin account provisioned? No FR covers admin-account creation or self-registration, and password reset is explicitly out of scope (`## Non-Goals`) — implying a seeded/manually-provisioned single account, but this isn't stated outright in the PRD. — Owner: user. Block: no (a sensible default — seed via migration/config — is available; naming this here just prevents it from being silently invented deep in implementation without anyone noticing).
 - **Risk:** Sequenced right after F-01 and before every panel slice, so no panel UI gets built against an unauthenticated stub that later needs retrofitting.
-- **Status:** proposed
+- **Status:** done
 
 ## Slices
 
@@ -190,3 +190,4 @@ Lifted from PRD `## Non-Goals` — MVP scope was already deliberately trimmed du
 ## Done
 
 - **F-01: (foundation) DB connectivity + migration tooling verified end-to-end** — Archived 2026-08-05 → `context/archive/2026-08-04-persistence-layer-foundation/`. Lesson: —.
+- **F-02: (foundation) An admin can log in with email + password; requests to panel actions without a valid session are rejected. No role distinction (matches PRD's flat single-role model).** — Archived 2026-08-05 → `context/archive/2026-08-05-admin-auth-foundation/`. Lesson: ASP.NET Core Data Protection keys aren't persisted across container restarts (see `context/foundation/lessons.md`).
