@@ -1,10 +1,10 @@
 ---
 change_id: persistence-layer-foundation
 title: Persistence layer wired (F-01 foundation)
-status: impl_reviewed
+status: archived
 created: 2026-08-04
 updated: 2026-08-05
-archived_at: null
+archived_at: 2026-08-05T19:57:57Z
 ---
 
 ## Notes
