@@ -8,6 +8,8 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_PATHBASE: /lassie
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ADMIN_EMAIL: "${ADMIN_EMAIL}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
     networks:
       - web
       - internal

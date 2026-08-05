@@ -1,4 +1,5 @@
 using Lassie.Data.Auditing;
+using Lassie.Data.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lassie.Data;
@@ -6,6 +7,7 @@ namespace Lassie.Data;
 public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbContext(options)
 {
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,6 +19,10 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
 
         modelBuilder.Entity<AuditLog>()
             .HasIndex(a => new { a.EntityName, a.EntityId });
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

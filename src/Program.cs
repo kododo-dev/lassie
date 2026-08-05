@@ -1,6 +1,8 @@
 using Lassie.Components;
 using Lassie.Data;
+using Lassie.Data.Users;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +34,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+// PasswordHasher<TUser>'s only state is immutable config fields plus a thread-safe
+// RandomNumberGenerator — safe as a Singleton even though AddIdentityCore defaults to Scoped.
+builder.Services.AddSingleton<PasswordHasher<User>>();
+
 var app = builder.Build();
 
 // Caddy's `handle_path /lassie*` already strips the prefix before proxying, so it's
@@ -50,7 +56,28 @@ if (!string.IsNullOrEmpty(pathBase))
 
 using (var scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.GetRequiredService<LassieDbContext>().Database.Migrate();
+    var context = scope.ServiceProvider.GetRequiredService<LassieDbContext>();
+    context.Database.Migrate();
+
+    if (!context.Users.Any())
+    {
+        var adminEmail = app.Configuration["ADMIN_EMAIL"];
+        var adminPassword = app.Configuration["ADMIN_PASSWORD"];
+
+        if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
+        {
+            throw new InvalidOperationException(
+                "No admin account exists and ADMIN_EMAIL/ADMIN_PASSWORD are not configured. " +
+                "Set both so the first admin account can be seeded.");
+        }
+
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<PasswordHasher<User>>();
+        var admin = new User { Email = adminEmail, PasswordHash = string.Empty };
+        admin.PasswordHash = passwordHasher.HashPassword(admin, adminPassword);
+
+        context.Users.Add(admin);
+        context.SaveChanges();
+    }
 }
 
 // Configure the HTTP request pipeline.

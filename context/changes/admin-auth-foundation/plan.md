@@ -253,24 +253,24 @@ Second migration ever created for this project (`InitialCreate` and `AddAuditLog
 
 #### Automated
 
-- [x] 1.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 1.1 `dotnet build src/lassie.csproj` succeeds — 3c96ebb
 
 #### Manual
 
-- [x] 1.2 `dotnet run --project src/lassie.csproj` starts without throwing
-- [x] 1.3 `http://localhost:5092/` renders the placeholder page with no browser console errors
+- [x] 1.2 `dotnet run --project src/lassie.csproj` starts without throwing — 3c96ebb
+- [x] 1.3 `http://localhost:5092/` renders the placeholder page with no browser console errors — 3c96ebb
 
 ### Phase 2: Users table + password hashing + startup seed
 
 #### Automated
 
-- [ ] 2.1 `dotnet build src/lassie.csproj` succeeds
-- [ ] 2.2 `src/Migrations/*_AddUsers.cs` exists after `dotnet ef migrations add AddUsers`
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 2.2 `src/Migrations/*_AddUsers.cs` exists after `dotnet ef migrations add AddUsers`
 
 #### Manual
 
-- [ ] 2.3 Local dev boot seeds exactly one `Users` row matching `ADMIN_EMAIL`, with a hashed (non-plaintext) `PasswordHash`
-- [ ] 2.4 Restarting the app a second time does not duplicate or error
+- [x] 2.3 Local dev boot seeds exactly one `Users` row matching `ADMIN_EMAIL`, with a hashed (non-plaintext) `PasswordHash`
+- [x] 2.4 Restarting the app a second time does not duplicate or error
 
 ### Phase 3: Login/logout pages + protected gate + production verification
 
