@@ -14,6 +14,9 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
         modelBuilder.Entity<AuditLog>()
             .Property(a => a.Snapshot)
             .HasColumnType("jsonb");
+
+        modelBuilder.Entity<AuditLog>()
+            .HasIndex(a => new { a.EntityName, a.EntityId });
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

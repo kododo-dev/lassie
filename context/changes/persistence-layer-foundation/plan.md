@@ -91,7 +91,7 @@ Get an empty `LassieDbContext` resolving via DI against a real Postgres, with a 
 
 **Intent**: A single-service, throwaway Postgres for local development, unrelated to and unreachable from the VPS.
 
-**Contract**: One `postgres` service (official `postgres` image), `POSTGRES_DB=lassie_dev`, `POSTGRES_USER=postgres`, `POSTGRES_PASSWORD=postgres`, port `5432` published to `localhost`, a named volume for data persistence across restarts.
+**Contract**: One `postgres` service (official `postgres` image), `POSTGRES_DB=lassie_dev`, `POSTGRES_USER=postgres`, `POSTGRES_PASSWORD=postgres`, port `5433` published to `localhost` (remapped from the default `5432` to avoid colliding with a pre-existing local Postgres instance), a named volume for data persistence across restarts.
 
 ### Success Criteria:
 
