@@ -1,0 +1,86 @@
+@page "/login"
+@using System.Security.Claims
+@using Lassie.Data
+@using Lassie.Data.Users
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject LassieDbContext DbContext
+@inject PasswordHasher<User> PasswordHasher
+@inject ILogger<Login> Logger
+@inject NavigationManager Navigation
+
+<PageTitle>Log in — Lassie</PageTitle>
+
+<h1>Log in</h1>
+
+<EditForm Model="Model" FormName="login" OnValidSubmit="HandleLoginAsync">
+    @if (errorMessage is not null)
+    {
+        <p>@errorMessage</p>
+    }
+    <div>
+        <label>Email</label>
+        <InputText @bind-Value="Model.Email" />
+    </div>
+    <div>
+        <label>Password</label>
+        <InputText type="password" @bind-Value="Model.Password" />
+    </div>
+    <button type="submit">Log in</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private LoginFormModel Model { get; set; } = new();
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private string? errorMessage;
+
+    // Verified against this fixed dummy hash (never a real credential) when no user
+    // matches the submitted email, so both branches pay the same PBKDF2 cost — skipping
+    // verification entirely on a miss would let response latency reveal which emails exist.
+    private static readonly string DummyPasswordHash =
+        new PasswordHasher<User>().HashPassword(null!, "not-a-real-password-used-only-for-timing-safety");
+
+    private async Task HandleLoginAsync()
+    {
+        var user = await DbContext.Users.SingleOrDefaultAsync(u => u.Email == Model.Email);
+        var result = user is null
+            ? PasswordHasher.VerifyHashedPassword(null!, DummyPasswordHash, Model.Password)
+            : PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, Model.Password);
+
+        if (user is null || result == PasswordVerificationResult.Failed)
+        {
+            Logger.LogWarning("Login failed for {Email}", Model.Email);
+            errorMessage = "Invalid email or password.";
+            return;
+        }
+
+        // Success and SuccessRehashNeeded both mean the credentials were correct — this
+        // MVP never changes PasswordHasherOptions after the account is seeded, so the
+        // rehash-on-login path never actually triggers and isn't handled separately.
+        Logger.LogInformation("Login succeeded for {Email}", Model.Email);
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Email),
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    private sealed class LoginFormModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}

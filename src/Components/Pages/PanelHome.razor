@@ -1,6 +1,22 @@
 @page "/"
+@attribute [Authorize]
 @rendermode InteractiveServer
 
 <PageTitle>Lassie</PageTitle>
 
 <h1>Lassie admin panel — placeholder</h1>
+<p>Logged in as @userEmail</p>
+<a href="/logout">Log out</a>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private string? userEmail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState;
+        userEmail = state.User.Identity?.Name;
+    }
+}

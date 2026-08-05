@@ -66,7 +66,7 @@ Pipeline order after the existing `app.UseHttpsRedirection();`: `app.UseStaticFi
 
 **Intent**: The root HTML document Blazor renders into, and the router that dispatches to pages under `Components/Pages/`.
 
-**Contract**: `App.razor` is the standard .NET 8+ Blazor Web App root component — `<html>`/`<head>`/`<body>` shell referencing `_framework/blazor.web.js`, with `<base href>` set from the same configured path-base value used by the middleware (default `/`). `Routes.razor` wraps `<Router AppAssembly>` in `<CascadingAuthenticationState>` (or relies on the app-wide cascading value from `AddCascadingAuthenticationState()` — no per-page wiring needed beyond the standard `<AuthorizeRouteView>` if used later). `_Imports.razor` includes the routing/authorization/components usings every page needs.
+**Contract**: `App.razor` is the standard .NET 8+ Blazor Web App root component — `<html>`/`<head>`/`<body>` shell referencing `_framework/blazor.web.js`, with `<base href>` set from the same configured path-base value used by the middleware (default `/`). `Routes.razor` uses `<AuthorizeRouteView>`, not plain `<RouteView>` — confirmed against Microsoft docs that plain `RouteView` silently ignores `[Authorize]` entirely (renders the routed component unconditionally), so it's the only mechanism that actually evaluates the cascaded `AuthenticationState` from `AddCascadingAuthenticationState()`. Its `NotAuthorized` fragment redirects unauthenticated users via a small dedicated `src/Components/RedirectToLogin.razor` component (new — `@inject NavigationManager`, calls `NavigateTo("/login", forceLoad: true)` in `OnInitialized`); an authenticated-but-unauthorized branch renders a plain "not authorized" message (currently unreachable dead code — no policies beyond plain `[Authorize]` exist yet — but forward-compatible). `_Imports.razor` includes the routing/authorization/components usings every page needs.
 
 #### 3. Placeholder panel page
 
@@ -193,7 +193,7 @@ Add the actual login/logout pages (static SSR, per Critical Implementation Detai
 
 #### 3. Gate the placeholder panel page
 
-**File**: `src/Components/Pages/PanelHome.razor`
+**File**: `src/Components/Pages/PanelHome.razor`, `src/Components/RedirectToLogin.razor` (new — see Phase 1 item 2's `Routes.razor` contract)
 
 **Intent**: This is the "requests to panel actions without a valid session are rejected" contract from F-02's roadmap outcome.
 
@@ -264,25 +264,25 @@ Second migration ever created for this project (`InitialCreate` and `AddAuditLog
 
 #### Automated
 
-- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
-- [x] 2.2 `src/Migrations/*_AddUsers.cs` exists after `dotnet ef migrations add AddUsers`
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds — 68e8d51
+- [x] 2.2 `src/Migrations/*_AddUsers.cs` exists after `dotnet ef migrations add AddUsers` — 68e8d51
 
 #### Manual
 
-- [x] 2.3 Local dev boot seeds exactly one `Users` row matching `ADMIN_EMAIL`, with a hashed (non-plaintext) `PasswordHash`
-- [x] 2.4 Restarting the app a second time does not duplicate or error
+- [x] 2.3 Local dev boot seeds exactly one `Users` row matching `ADMIN_EMAIL`, with a hashed (non-plaintext) `PasswordHash` — 68e8d51
+- [x] 2.4 Restarting the app a second time does not duplicate or error — 68e8d51
 
 ### Phase 3: Login/logout pages + protected gate + production verification
 
 #### Automated
 
-- [ ] 3.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 3.1 `dotnet build src/lassie.csproj` succeeds
 
 #### Manual
 
-- [ ] 3.2 Local: unauthenticated `/` redirects to `/login`
-- [ ] 3.3 Local: wrong credentials show generic error, log a warning, set no cookie
-- [ ] 3.4 Local: correct credentials log in, session persists across reload
-- [ ] 3.5 Local: logout redirects to `/login` and re-gates `/`
+- [x] 3.2 Local: unauthenticated `/` redirects to `/login`
+- [x] 3.3 Local: wrong credentials show generic error, log a warning, set no cookie
+- [x] 3.4 Local: correct credentials log in, session persists across reload
+- [x] 3.5 Local: logout redirects to `/login` and re-gates `/`
 - [ ] 3.6 Production: full login/logout cycle works at `kododo.dev/lassie` with correct path-prefixed redirects
 - [ ] 3.7 Production: `docker compose logs lassie` shows clean startup and expected login/logout log lines
