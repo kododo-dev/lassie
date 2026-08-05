@@ -2,6 +2,7 @@ using Lassie.Components;
 using Lassie.Data;
 using Lassie.Data.Users;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +40,19 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<PasswordHasher<User>>();
 
 var app = builder.Build();
+
+// Caddy terminates TLS and talks plain HTTP to this container, so Kestrel sees
+// Request.Scheme as "http" unless told otherwise — that leaks into generated absolute
+// URLs (e.g. the cookie challenge's redirect Location header ends up http:// instead of
+// https://). Trust X-Forwarded-Proto from any source: Kestrel is only ever reached
+// through Caddy on the internal Docker network, never exposed directly.
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+};
+forwardedHeadersOptions.KnownIPNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
 
 // Caddy's `handle_path /lassie*` already strips the prefix before proxying, so it's
 // never present in Request.Path for UsePathBase() to strip — force it onto PathBase

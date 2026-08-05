@@ -1,11 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY src/lassie.csproj src/
-RUN dotnet restore src/lassie.csproj
-
 COPY src/ src/
-RUN dotnet publish src/lassie.csproj -c Release -o /app --no-restore
+RUN dotnet publish src/lassie.csproj -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app

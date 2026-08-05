@@ -40,6 +40,11 @@ Wire cookie-based authentication into the panel, backed by a `Users` table with 
 
 Add an unconditional middleware early in `Program.cs` (before `UseAuthentication`/`UseRouting`-equivalent calls) that sets `context.Request.PathBase = new PathString(configuredPathBase)` whenever configuration key `ASPNETCORE_PATHBASE` is non-empty — do not use the built-in `UsePathBase()` middleware, since it only strips a prefix that's already present in `Request.Path`, and Caddy's `handle_path` has already removed it by the time the request reaches Kestrel. `Components/App.razor`'s `<base href>` must read the same configured value (defaulting to `/` when unset, which is the case in local dev) so Blazor's client script builds correct asset and SignalR negotiate URLs. This is inert in local dev (no `ASPNETCORE_PATHBASE` set there) and only observable in production — Phase 3's production verification step is what actually proves it.
 
+### Discovered during Phase 3 production verification (two fixes, both confirmed only observable in production)
+
+- **Scheme leaks into generated redirect URLs.** Caddy terminates TLS and talks plain HTTP to the container, so `Request.Scheme` is always `"http"` from Kestrel's point of view — this leaked into the cookie challenge's absolute redirect `Location` header (`http://kododo.dev/lassie/login...` instead of `https://...`). Fixed by adding `app.UseForwardedHeaders(...)` (trusting `X-Forwarded-Proto`/`X-Forwarded-For` from any source, since Kestrel is never reached except through Caddy on the internal Docker network) right after `var app = builder.Build();`, before the path-base middleware. Confirmed via a local Docker build with a simulated `X-Forwarded-Proto: https` header.
+- **Static web assets (including Blazor's own `_framework/blazor.web.js`) were entirely missing from the published Docker image** — `wwwroot` didn't exist in the container at all, `_framework/blazor.web.js` 404'd. Root cause: the Dockerfile's `COPY src/lassie.csproj src/` → `dotnet restore` → `COPY src/ src/` → `dotnet publish --no-restore` layer-caching pattern produces an incomplete static-web-assets manifest for Blazor projects specifically (confirmed by reproducing locally: a plain `dotnet publish` on the full source tree produces a correct ~14KB manifest; the Docker two-step restore/publish sequence produces an empty one). Fixed by collapsing the Dockerfile to a single `COPY src/ src/` → `dotnet publish` (no separate early restore, no `--no-restore`) — trades away some restore-layer caching for correctness, acceptable at this project's size.
+
 ## Phase 1: Blazor Server scaffolding + cookie-auth infrastructure
 
 ### Overview
@@ -276,13 +281,13 @@ Second migration ever created for this project (`InitialCreate` and `AddAuditLog
 
 #### Automated
 
-- [x] 3.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 3.1 `dotnet build src/lassie.csproj` succeeds — c52ace3
 
 #### Manual
 
-- [x] 3.2 Local: unauthenticated `/` redirects to `/login`
-- [x] 3.3 Local: wrong credentials show generic error, log a warning, set no cookie
-- [x] 3.4 Local: correct credentials log in, session persists across reload
-- [x] 3.5 Local: logout redirects to `/login` and re-gates `/`
+- [x] 3.2 Local: unauthenticated `/` redirects to `/login` — c52ace3
+- [x] 3.3 Local: wrong credentials show generic error, log a warning, set no cookie — c52ace3
+- [x] 3.4 Local: correct credentials log in, session persists across reload — c52ace3
+- [x] 3.5 Local: logout redirects to `/login` and re-gates `/` — c52ace3
 - [ ] 3.6 Production: full login/logout cycle works at `kododo.dev/lassie` with correct path-prefixed redirects
 - [ ] 3.7 Production: `docker compose logs lassie` shows clean startup and expected login/logout log lines
