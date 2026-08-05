@@ -1,0 +1,21 @@
+@inject IConfiguration Configuration
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="@BaseHref" />
+    <HeadOutlet />
+</head>
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+</html>
+
+@code {
+    private string BaseHref =>
+        string.IsNullOrEmpty(Configuration["ASPNETCORE_PATHBASE"])
+            ? "/"
+            : Configuration["ASPNETCORE_PATHBASE"]!.TrimEnd('/') + "/";
+}
