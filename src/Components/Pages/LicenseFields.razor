@@ -1,0 +1,368 @@
+@page "/license-fields"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@layout MainLayout
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using Lassie.Data
+@using Lassie.Data.LicenseFields
+@inject LassieDbContext DbContext
+
+<PageTitle>License Fields — Lassie</PageTitle>
+
+<h1>License Fields</h1>
+
+<h2>@(editingFieldId is null ? "Create a field" : "Edit field")</h2>
+
+<EditForm Model="FieldModel" OnValidSubmit="HandleFieldSubmit">
+    <DataAnnotationsValidator />
+    <div>
+        <label>Name</label>
+        <InputText @bind-Value="FieldModel.Name" />
+        <ValidationMessage For="@(() => FieldModel.Name)" />
+    </div>
+    <div>
+        <label>Data type</label>
+        @if (editingFieldId is null)
+        {
+            <InputSelect @bind-Value="FieldModel.DataType">
+                @foreach (var type in Enum.GetValues<LicenseFieldDataType>())
+                {
+                    <option value="@type">@type</option>
+                }
+            </InputSelect>
+        }
+        else
+        {
+            <span>@FieldModel.DataType</span>
+        }
+    </div>
+    @if (fieldFormError is not null)
+    {
+        <p>@fieldFormError</p>
+    }
+    <button type="submit">@(editingFieldId is null ? "Create field" : "Save field")</button>
+    @if (editingFieldId is not null)
+    {
+        <button type="button" @onclick="CancelEditField">Cancel</button>
+    }
+</EditForm>
+
+<h2>Fields</h2>
+
+@if (fields.Count == 0)
+{
+    <p>No license fields defined yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Data type</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var field in fields)
+            {
+                <tr @key="field.Id">
+                    <td>@field.Name</td>
+                    <td>@field.DataType</td>
+                    <td>
+                        @if (fieldPendingDeleteId == field.Id)
+                        {
+                            <span>Are you sure?</span>
+                            <button type="button" @onclick="() => DeleteFieldAsync(field)">Yes</button>
+                            <button type="button" @onclick="() => fieldPendingDeleteId = null">No</button>
+                        }
+                        else
+                        {
+                            @if (field.DataType == LicenseFieldDataType.SingleSelect)
+                            {
+                                <button type="button" @onclick="() => ToggleSelectField(field)">
+                                    @(selectedFieldId == field.Id ? "Hide options" : "Options")
+                                </button>
+                            }
+                            <button type="button" @onclick="() => StartEditField(field)">Edit</button>
+                            <button type="button" @onclick="() => fieldPendingDeleteId = field.Id">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (SelectedField is not null && SelectedField.DataType == LicenseFieldDataType.SingleSelect)
+{
+    <h2>Options for @SelectedField.Name</h2>
+
+    @if (optionFormError is not null)
+    {
+        <p>@optionFormError</p>
+    }
+
+    @if (SelectedField.Options.Count == 0)
+    {
+        <p>No options defined yet.</p>
+    }
+    else
+    {
+        <table>
+            <tbody>
+                @foreach (var option in SelectedField.Options.OrderBy(o => o.Value))
+                {
+                    <tr @key="option.Id">
+                        @if (editingOptionId == option.Id)
+                        {
+                            <td><input @bind="editingOptionValue" /></td>
+                            <td>
+                                <button type="button" @onclick="() => SaveOptionRenameAsync(option)">Save</button>
+                                <button type="button" @onclick="CancelEditOption">Cancel</button>
+                            </td>
+                        }
+                        else if (optionPendingDeleteId == option.Id)
+                        {
+                            <td>@option.Value</td>
+                            <td>
+                                <span>Are you sure?</span>
+                                <button type="button" @onclick="() => DeleteOptionAsync(option)">Yes</button>
+                                <button type="button" @onclick="() => optionPendingDeleteId = null">No</button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>@option.Value</td>
+                            <td>
+                                <button type="button" @onclick="() => StartEditOption(option)">Rename</button>
+                                <button type="button" @onclick="() => optionPendingDeleteId = option.Id">Delete</button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div>
+        <input @bind="newOptionValue" placeholder="New option value" />
+        <button type="button" @onclick="AddOptionAsync">Add option</button>
+    </div>
+}
+
+@code {
+    private List<LicenseField> fields = [];
+    private long? selectedFieldId;
+    private long? editingFieldId;
+    private long? fieldPendingDeleteId;
+    private string? fieldFormError;
+
+    private long? editingOptionId;
+    private string editingOptionValue = "";
+    private long? optionPendingDeleteId;
+    private string newOptionValue = "";
+    private string? optionFormError;
+
+    private FieldFormModel FieldModel { get; set; } = new();
+
+    private LicenseField? SelectedField => fields.FirstOrDefault(f => f.Id == selectedFieldId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadFieldsAsync();
+    }
+
+    private async Task ReloadFieldsAsync()
+    {
+        fields = await DbContext.LicenseFields
+            .Include(f => f.Options)
+            .OrderBy(f => f.Name)
+            .ToListAsync();
+    }
+
+    private void ToggleSelectField(LicenseField field)
+    {
+        selectedFieldId = selectedFieldId == field.Id ? null : field.Id;
+        optionFormError = null;
+        editingOptionId = null;
+        optionPendingDeleteId = null;
+    }
+
+    private void StartEditField(LicenseField field)
+    {
+        editingFieldId = field.Id;
+        fieldFormError = null;
+        FieldModel = new FieldFormModel { Name = field.Name, DataType = field.DataType };
+    }
+
+    private void CancelEditField()
+    {
+        editingFieldId = null;
+        fieldFormError = null;
+        FieldModel = new FieldFormModel();
+    }
+
+    private async Task HandleFieldSubmit()
+    {
+        fieldFormError = null;
+
+        if (editingFieldId is null)
+        {
+            var newField = new LicenseField { Name = FieldModel.Name, DataType = FieldModel.DataType };
+            DbContext.LicenseFields.Add(newField);
+
+            try
+            {
+                await DbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                DbContext.Entry(newField).State = EntityState.Detached;
+                fieldFormError = IsUniqueViolation(ex)
+                    ? "A field with this name already exists."
+                    : "Something went wrong saving the field. Try again.";
+                return;
+            }
+        }
+        else
+        {
+            var field = fields.First(f => f.Id == editingFieldId.Value);
+            field.Name = FieldModel.Name;
+
+            try
+            {
+                await DbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                await DbContext.Entry(field).ReloadAsync();
+                fieldFormError = IsUniqueViolation(ex)
+                    ? "A field with this name already exists."
+                    : "Something went wrong saving the field. Try again.";
+                return;
+            }
+        }
+
+        editingFieldId = null;
+        FieldModel = new FieldFormModel();
+        await ReloadFieldsAsync();
+    }
+
+    private async Task DeleteFieldAsync(LicenseField field)
+    {
+        DbContext.LicenseFields.Remove(field);
+        await DbContext.SaveChangesAsync();
+
+        fieldPendingDeleteId = null;
+        if (selectedFieldId == field.Id)
+        {
+            selectedFieldId = null;
+        }
+        if (editingFieldId == field.Id)
+        {
+            CancelEditField();
+        }
+
+        await ReloadFieldsAsync();
+    }
+
+    private void StartEditOption(LicenseFieldOption option)
+    {
+        editingOptionId = option.Id;
+        editingOptionValue = option.Value;
+        optionFormError = null;
+    }
+
+    private void CancelEditOption()
+    {
+        editingOptionId = null;
+        editingOptionValue = "";
+        optionFormError = null;
+    }
+
+    private async Task SaveOptionRenameAsync(LicenseFieldOption option)
+    {
+        optionFormError = null;
+        var value = editingOptionValue.Trim();
+        if (value.Length == 0)
+        {
+            optionFormError = "Value cannot be empty.";
+            return;
+        }
+
+        option.Value = value;
+
+        try
+        {
+            await DbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            await DbContext.Entry(option).ReloadAsync();
+            optionFormError = IsUniqueViolation(ex)
+                ? "This value already exists for this field."
+                : "Something went wrong saving the option. Try again.";
+            return;
+        }
+
+        editingOptionId = null;
+        editingOptionValue = "";
+        await ReloadFieldsAsync();
+    }
+
+    private async Task AddOptionAsync()
+    {
+        optionFormError = null;
+        var field = SelectedField;
+        if (field is null)
+        {
+            return;
+        }
+
+        var value = newOptionValue.Trim();
+        if (value.Length == 0)
+        {
+            optionFormError = "Value cannot be empty.";
+            return;
+        }
+
+        var newOption = new LicenseFieldOption { LicenseFieldId = field.Id, Value = value };
+        DbContext.LicenseFieldOptions.Add(newOption);
+
+        try
+        {
+            await DbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            DbContext.Entry(newOption).State = EntityState.Detached;
+            optionFormError = IsUniqueViolation(ex)
+                ? "This value already exists for this field."
+                : "Something went wrong saving the option. Try again.";
+            return;
+        }
+
+        newOptionValue = "";
+        await ReloadFieldsAsync();
+    }
+
+    private async Task DeleteOptionAsync(LicenseFieldOption option)
+    {
+        DbContext.LicenseFieldOptions.Remove(option);
+        await DbContext.SaveChangesAsync();
+        optionPendingDeleteId = null;
+        await ReloadFieldsAsync();
+    }
+
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException is Npgsql.PostgresException { SqlState: "23505" };
+
+    private class FieldFormModel
+    {
+        [Required]
+        public string Name { get; set; } = "";
+        public LicenseFieldDataType DataType { get; set; } = LicenseFieldDataType.Text;
+    }
+}
