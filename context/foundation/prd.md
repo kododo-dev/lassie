@@ -3,6 +3,7 @@ project: "Lassie"
 version: 1
 status: draft
 created: 2026-08-02
+updated: 2026-08-06
 context_type: greenfield
 product_type: web-app
 target_scale:
@@ -19,13 +20,13 @@ timeline_budget:
 
 ## Vision & Problem Statement
 
-Firma dostarczająca własny produkt wdrażany u wielu klientów nie ma dziś scentralizowanego sposobu zarządzania licencjami tych wdrożeń — nadawanie dostępu, ograniczanie modułów i limitu użytkowników odbywa się ręcznie. Obecnie używane narzędzie (Intellilock) wiąże licencję z fizyczną maszyną, co zawodzi w środowiskach chmurowych, gdzie fizyczna maszyna pod wdrożeniem zmienia się w czasie.
+Firma dostarczająca własny produkt wdrażany u wielu klientów nie ma dziś scentralizowanego sposobu zarządzania licencjami tych wdrożeń — nadawanie dostępu i konfigurowanie parametrów licencji (np. rodzaju, limitu użytkowników) odbywa się ręcznie. Obecnie używane narzędzie (Intellilock) wiąże licencję z fizyczną maszyną, co zawodzi w środowiskach chmurowych, gdzie fizyczna maszyna pod wdrożeniem zmienia się w czasie.
 
 Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja licencji musi tolerować okresową, a nie ciągłą łączność — a jednocześnie musi zabezpieczać przed nieautoryzowanym współdzieleniem tej samej licencji, bez polegania na twardym powiązaniu ze sprzętem.
 
 ## User & Persona
 
-**Primary persona**: Administrator licencji po stronie firmy-dostawcy — pojedyncza osoba (rola admina) odpowiedzialna za nadawanie, edycję i dezaktywację licencji dla klientów, którym wdrożono produkt. Sięga po Lassie przy każdym nowym wdrożeniu (utworzenie licencji), przy zmianie warunków umowy z klientem (zmiana modułów/limitów) oraz gdy trzeba zweryfikować lub wyłączyć licencję.
+**Primary persona**: Administrator licencji po stronie firmy-dostawcy — pojedyncza osoba (rola admina) odpowiedzialna za nadawanie, edycję i dezaktywację licencji dla klientów, którym wdrożono produkt. Sięga po Lassie przy każdym nowym wdrożeniu (utworzenie licencji), przy zmianie warunków umowy z klientem (zmiana wartości pól licencji) oraz gdy trzeba zweryfikować lub wyłączyć licencję.
 
 > Forward (poza MVP): docelowo dostęp do zarządzania licencjami ma mieć cały zespół (wdrożeniowy/support/sprzedaż), a Lassie ma stać się usługą, z której korzystają też inne firmy softwarowe zarządzające licencjami własnych produktów — nie tylko wy sami.
 
@@ -33,27 +34,27 @@ Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja lice
 
 ### Primary
 - Administrator tworzy licencję w mniej niż 2 minuty przez panel
-- Aplikacja kliencka poprawnie odczytuje status licencji, dostępne moduły i limity przez API
+- Aplikacja kliencka poprawnie odczytuje status licencji oraz wartości jej pól (np. rodzaj, limit użytkowników) przez API
 
 ### Secondary
 (brak — nie zidentyfikowano dodatkowego kryterium "mile widzianego")
 
 ### Guardrails
 - Weryfikacja licencji przez API odpowiada w czasie poniżej 500ms
-- API zawsze zwraca poprawny i aktualny status licencji (moduły, limity) — Lassie odpowiada za dokładność danych, nie za ich egzekwowanie po stronie aplikacji klienckiej
+- API zawsze zwraca poprawny i aktualny status licencji oraz wartości jej pól — Lassie odpowiada za dokładność danych, nie za ich egzekwowanie po stronie aplikacji klienckiej
 
 ## User Stories
 
 ### US-01: Administrator tworzy licencję, aplikacja kliencka ją weryfikuje
 
 - **Given** zalogowany Administrator
-- **When** Administrator tworzy nową licencję, nadając jej etykietę, wybierając moduły i limit użytkowników
-- **Then** system generuje unikalny klucz API; aplikacja kliencka używająca tego klucza otrzymuje z API poprawny status licencji, listę modułów i limit
+- **When** Administrator tworzy nową licencję, nadając jej etykietę i wypełniając wartości zdefiniowanych pól licencji (np. rodzaj, limit użytkowników)
+- **Then** system generuje unikalny klucz API; aplikacja kliencka używająca tego klucza otrzymuje z API poprawny status licencji oraz wartości jej pól
 
 #### Acceptance Criteria
 - Klucz API jest unikalny w całym systemie
 - Zapytanie API z niepoprawnym/brakującym kluczem zwraca błąd autoryzacji
-- Odpowiedź API zawiera: ważność licencji, listę modułów, limit użytkowników
+- Odpowiedź API zawiera: ważność licencji oraz wartości jej zdefiniowanych pól
 - Czas odpowiedzi API < 500ms
 
 ## Functional Requirements
@@ -64,14 +65,15 @@ Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja lice
 - ~~FR-003: Administrator can dezaktywować klienta.~~ Usunięte.
   > Socrates: Podczas dyskusji nad FR-005 (kardynalność klient↔licencja) admin zakwestionował sens osobnego bytu "Klient". Rozwiązanie: koncept klienta usunięty z MVP — licencja jest jednostką podstawową, płaska lista bez grupowania. Grupowanie licencji w foldery to nice-to-have poza MVP (patrz `## Non-Goals`).
 
-### Definicje modułów
-- FR-004: Administrator can definiować i zarządzać listą dostępnych modułów licencyjnych (tworzenie/edycja definicji modułu). Priority: must-have
-  > Socrates: Kontrargument rozważony: moduły mogłyby być hardcoded w kodzie zamiast zarządzane dynamicznie przez panel, żeby uprościć MVP. Rozwiązanie: zostaje must-have — produkt szybko się rozwija, dynamiczne zarządzanie modułami jest ważniejsze niż się wydaje.
+### Definiowalne pola licencji
+- FR-004: Administrator can definiować i zarządzać zestawem pól opisujących licencję — nazwa pola oraz typ danych (liczba / tekst / wybór jednokrotny z listy), a dla pól typu wyboru: zarządzać listą dozwolonych opcji. Startowy, przykładowy zestaw: pole "Rodzaj licencji" (wybór: regular/professional/enterprise), pole "Liczba użytkowników" (liczba) — nie jest to zamknięta ani wyczerpująca lista, admin może dodawać kolejne pola. Priority: must-have
+  > Socrates: Kontrargument rozważony: zestaw pól mógłby być stały/hardcoded (zawsze "rodzaj" + "limit użytkowników") zamiast w pełni konfigurowalny, żeby uprościć MVP. Rozwiązanie: zostaje w pełni konfigurowalny — ten sam argument, który przeważył dla wcześniejszych iteracji tego FR: produkt szybko się rozwija, nowe pole nie powinno wymagać deploya kodu. Same typy danych (liczba/tekst/wybór) pozostają zamkniętym, zakodowanym zestawem — dynamiczne są tylko nazwy i wystąpienia pól, nie same prymitywy typów.
+  > Zmiana (2026-08-06, druga iteracja): pierwotny koncept "modułów" (wielokrotnego wyboru lista funkcji per licencja, gating dostępu) zastąpiony najpierw prostym jednopolowym "rodzajem licencji", a po dalszym namyśle — w pełni konfigurowalnym schematem pól (ten wpis). Uzasadnienie: `context/changes/module-catalog-management/research.md`.
 
 ### Licencje
-- FR-005: Administrator can tworzyć licencję — nadając jej etykietę tekstową (np. nazwę klienta/wdrożenia), wybierając moduły spośród zdefiniowanych, limit użytkowników oraz opcjonalną datę wygaśnięcia. Priority: must-have
+- FR-005: Administrator can tworzyć licencję — nadając jej etykietę tekstową (np. nazwę klienta/wdrożenia), wypełniając wartości aktualnie zdefiniowanych pól licencji (FR-004) oraz opcjonalną datę wygaśnięcia. Priority: must-have
   > Socrates: Kontrargument rozważony: model "1 klient = 1 licencja" może być zbyt uproszczony (klient może potrzebować wielu licencji, np. test/prod). Rozwiązanie: koncept klienta usunięty — licencja jest samodzielną jednostką z własną etykietą tekstową, żadnej sztywnej kardynalności do egzekwowania.
-- FR-006: Administrator can edytować licencję (moduły, limity, data wygaśnięcia), z zachowaniem historii poprzednich wersji do audytu. Priority: must-have
+- FR-006: Administrator can edytować licencję (wartości pól, data wygaśnięcia), z zachowaniem historii poprzednich wersji do audytu. Priority: must-have
   > Socrates: Kontrargument rozważony: edycja mogłaby tylko nadpisywać bieżące wartości bez historii. Rozwiązanie: potrzebna historia zmian/audyt — każda edycja zapisywana jako wpis w historii.
 - FR-007: Administrator can dezaktywować licencję, z możliwością późniejszej reaktywacji. Priority: must-have
   > Socrates: Kontrargument rozważony: dezaktywacja mogłaby być trwała (bez możliwości cofnięcia). Rozwiązanie: dezaktywacja to stan tymczasowy, reaktywacja możliwa.
@@ -81,7 +83,7 @@ Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja lice
 ### API weryfikacji
 - FR-009: Aplikacja kliencka can odpytać status licencji przez API, uwierzytelniając się kluczem API. Priority: must-have
   > Socrates: Kontrargument rozważony: zapytanie API mogłoby już teraz przesyłać identyfikator instalacji/heartbeat jako fundament pod przyszłe wykrywanie współdzielenia licencji. Rozwiązanie: poza MVP — API na razie tylko odczytuje status.
-- FR-010: API zwraca ważność licencji, dostępne moduły i limit użytkowników. Priority: must-have
+- FR-010: API zwraca ważność licencji oraz wartości jej zdefiniowanych pól (np. rodzaj, limit użytkowników). Priority: must-have
   > Socrates: Kontrargument rozważony: API mogłoby zwracać szczegółową przyczynę nieważności (wygasła vs dezaktywowana) zamiast prostego statusu. Rozwiązanie: prosty status wystarczy w MVP.
 
 ### Panel administracyjny
@@ -100,16 +102,16 @@ Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja lice
 
 ## Business Logic
 
-Lassie określa, czy dana instancja aplikacji klienckiej ma prawo działać z określonymi modułami i limitami, na podstawie aktualnego stanu jej licencji (status aktywna/dezaktywowana oraz data wygaśnięcia).
+Lassie określa ważność licencji oraz aktualne wartości jej pól, na podstawie aktualnego stanu licencji (status aktywna/dezaktywowana oraz data wygaśnięcia). Interpretacja, co poszczególne pola (np. rodzaj, limit użytkowników) oznaczają dla dostępnych funkcji, leży po stronie aplikacji klienckiej — Lassie raportuje wartości, nie egzekwuje ich znaczenia.
 
-Wejściem reguły jest klucz API identyfikujący licencję, przesyłany przez aplikację kliencką przy każdym zapytaniu. Wyjściem jest odpowiedź zawierająca ważność licencji (aktywna i niewygasła / nieaktywna lub wygasła), listę dostępnych modułów oraz limit użytkowników. Aplikacja kliencka odpytuje ten stan okresowo — nie w czasie rzeczywistym — i sama stosuje otrzymane ograniczenia; decyzja o wpuszczeniu lub zablokowaniu konkretnego użytkownika zapada po stronie aplikacji klienckiej, na podstawie danych zwróconych przez Lassie.
+Wejściem reguły jest klucz API identyfikujący licencję, przesyłany przez aplikację kliencką przy każdym zapytaniu. Wyjściem jest odpowiedź zawierająca ważność licencji (aktywna i niewygasła / nieaktywna lub wygasła) oraz wartości jej zdefiniowanych pól. Aplikacja kliencka odpytuje ten stan okresowo — nie w czasie rzeczywistym — i sama stosuje otrzymane ograniczenia; decyzja o wpuszczeniu lub zablokowaniu konkretnego użytkownika zapada po stronie aplikacji klienckiej, na podstawie danych zwróconych przez Lassie.
 
 ## Access Control
 
 Dwa odrębne rodzaje dostępu:
 
 - **Panel administracyjny (człowiek)**: logowanie email + hasło. Model płaski — jedna rola Administratora z pełnymi uprawnieniami (tworzenie/edycja/dezaktywacja licencji, przegląd statusów). Bez rozróżnienia ról w MVP.
-- **API weryfikacji licencji (maszyna-do-maszyny)**: aplikacja kliencka uwierzytelnia się kluczem API przypisanym do konkretnej licencji, żeby okresowo sprawdzić jej status, dostępne moduły i limity.
+- **API weryfikacji licencji (maszyna-do-maszyny)**: aplikacja kliencka uwierzytelnia się kluczem API przypisanym do konkretnej licencji, żeby okresowo sprawdzić jej status oraz wartości jej pól.
 
 > Forward (poza MVP): rozróżnienie ról w panelu (np. read-only dla supportu) dla wieloosobowego zespołu.
 
@@ -121,7 +123,8 @@ Dwa odrębne rodzaje dostępu:
 - Self-service portal dla klienta końcowego — w MVP licencjami zarządza wyłącznie administrator po stronie dostawcy.
 - Obsługa wielu firm jako klientów Lassie (multi-tenant) — MVP służy tylko jednej firmie (nam); rozszerzenie na inne firmy to cel docelowy.
 - Grupowanie licencji w foldery — licencja jest płaską, samodzielną jednostką w MVP.
-- Zaawansowane modele licencjonowania (subskrypcje wielopoziomowe, trial z automatycznym wygasaniem, licencje floating/współdzielone między instancjami).
+- Zaawansowane modele licencjonowania (subskrypcje wielopoziomowe, trial z automatycznym wygasaniem, licencje floating/współdzielone między instancjami) — definiowalne pola licencji (FR-004) to elastyczny, ale płaski zestaw atrybutów opisowych bez wpływu na dostępne funkcje ani wbudowanej logiki subskrypcyjnej (billing, auto-wygasanie, floating), nie system tierowanych planów.
+- Rozszerzanie zestawu dostępnych typów danych pola (poza liczba/tekst/wybór jednokrotny) bez zmiany kodu — typy danych są zamkniętym, zakodowanym zestawem; dynamiczne (FR-004) są tylko nazwy i wystąpienia pól, nie same prymitywy typów.
 - Powiadomienia o zbliżającym się wygaśnięciu licencji.
 - Wykrywanie nieautoryzowanego współdzielenia licencji — cel docelowy, nie MVP.
 - Rotacja/regeneracja klucza API bez tworzenia nowej licencji.
@@ -130,7 +133,7 @@ Dwa odrębne rodzaje dostępu:
 
 **Niefunkcjonalne:**
 - Wielojęzyczność i white-labeling panelu administracyjnego.
-- Zaawansowana telemetria i analityka wykorzystania modułów przez klientów.
+- Zaawansowana telemetria i analityka wykorzystania licencji przez klientów.
 
 ## Open Questions
 
