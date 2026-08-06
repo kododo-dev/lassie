@@ -264,27 +264,27 @@ Purely additive — `AddLicenseFields` creates two new tables with no existing d
 
 #### Automated
 
-- [x] 1.1 `dotnet build src/lassie.csproj` succeeds
-- [x] 1.2 `dotnet ef migrations add AddLicenseFields` generates cleanly
-- [x] 1.3 `dotnet ef database update` applies cleanly against local dev Postgres
+- [x] 1.1 `dotnet build src/lassie.csproj` succeeds — a470efc
+- [x] 1.2 `dotnet ef migrations add AddLicenseFields` generates cleanly — a470efc
+- [x] 1.3 `dotnet ef database update` applies cleanly against local dev Postgres — a470efc
 
 #### Manual
 
-- [ ] 1.4 Migration file creates `LicenseFields` (unique `Name`) and `LicenseFieldOptions` (unique composite index, cascade-delete FK) tables
-- [ ] 1.5 `dotnet ef migrations list` shows `AddLicenseFields` with no gaps
+- [x] 1.4 Migration file creates `LicenseFields` (unique `Name`) and `LicenseFieldOptions` (unique composite index, cascade-delete FK) tables — a470efc
+- [x] 1.5 `dotnet ef migrations list` shows `AddLicenseFields` with no gaps — a470efc
 
 ### Phase 2: Panel shell — shared layout + Pico.css
 
 #### Automated
 
-- [ ] 2.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
 
 #### Manual
 
-- [ ] 2.2 Home renders with new nav + Pico.css; Login/Logout render with Pico.css
-- [ ] 2.3 "Log out" from Home lands on `/lassie/login`, not the domain root
+- [x] 2.2 Home renders with new nav + Pico.css; Login/Logout render with Pico.css
+- [x] 2.3 "Log out" from Home lands on `/lassie/login`, not the domain root
 - [ ] 2.4 Phone-width viewport stays usable, no lost functionality
-- [ ] 2.5 Docker build confirmed to include `pico.min.css` in the running container
+- [x] 2.5 Docker build confirmed to include `pico.min.css` in the running container
 
 ### Phase 3: License Fields CRUD page (with nested options management)
 

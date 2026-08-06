@@ -1,12 +1,13 @@
 @page "/"
 @attribute [Authorize]
+@layout MainLayout
 @rendermode InteractiveServer
 
 <PageTitle>Lassie</PageTitle>
 
 <h1>Lassie admin panel — placeholder</h1>
 <p>Logged in as @userEmail</p>
-<a href="/logout">Log out</a>
+<a href="logout">Log out</a>
 
 @code {
     [CascadingParameter]
