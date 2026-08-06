@@ -277,14 +277,14 @@ Purely additive — `AddLicenseFields` creates two new tables with no existing d
 
 #### Automated
 
-- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds — cd67a7e
 
 #### Manual
 
-- [x] 2.2 Home renders with new nav + Pico.css; Login/Logout render with Pico.css
-- [x] 2.3 "Log out" from Home lands on `/lassie/login`, not the domain root
-- [ ] 2.4 Phone-width viewport stays usable, no lost functionality
-- [x] 2.5 Docker build confirmed to include `pico.min.css` in the running container
+- [x] 2.2 Home renders with new nav + Pico.css; Login/Logout render with Pico.css — cd67a7e
+- [x] 2.3 "Log out" from Home lands on `/lassie/login`, not the domain root — cd67a7e (verified locally without path prefix; full `/lassie` prefix re-verified in Phase 3's production walkthrough)
+- [ ] 2.4 Phone-width viewport stays usable, no lost functionality — not verified (browser automation couldn't resize the viewport in this environment); needs manual check
+- [x] 2.5 Docker build confirmed to include `pico.min.css` in the running container — cd67a7e
 
 ### Phase 3: License Fields CRUD page (with nested options management)
 
