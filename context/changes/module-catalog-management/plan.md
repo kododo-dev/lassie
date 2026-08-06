@@ -290,18 +290,18 @@ Purely additive — `AddLicenseFields` creates two new tables with no existing d
 
 #### Automated
 
-- [x] 3.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 3.1 `dotnet build src/lassie.csproj` succeeds — 7b5a680
 
 #### Manual
 
-- [x] 3.2 Create a `Number` field appears in list, no options section
-- [x] 3.3 Create a `SingleSelect` field appears in list, empty options section shown on selection
-- [x] 3.4 Add options to a `SingleSelect` field appear in nested list immediately
-- [x] 3.5 Duplicate option value shows friendly validation error, no crash
-- [x] 3.6 Duplicate field name shows friendly validation error, no crash
-- [x] 3.7 Edit field name updates the list; `DataType` shown read-only on existing field
-- [x] 3.8 Deleting a field with options cascade-deletes its options
-- [x] 3.9 Deleting a single option leaves its parent field and remaining options intact
-- [x] 3.10 Logged-out visit to `/license-fields` redirects to `/login`
+- [x] 3.2 Create a `Number` field appears in list, no options section — 7b5a680
+- [x] 3.3 Create a `SingleSelect` field appears in list, empty options section shown on selection — 7b5a680
+- [x] 3.4 Add options to a `SingleSelect` field appear in nested list immediately — 7b5a680
+- [x] 3.5 Duplicate option value shows friendly validation error, no crash — 7b5a680
+- [x] 3.6 Duplicate field name shows friendly validation error, no crash — 7b5a680
+- [x] 3.7 Edit field name updates the list; `DataType` shown read-only on existing field — 7b5a680
+- [x] 3.8 Deleting a field with options cascade-deletes its options — 7b5a680
+- [x] 3.9 Deleting a single option leaves its parent field and remaining options intact — 7b5a680
+- [x] 3.10 Logged-out visit to `/license-fields` redirects to `/login` — 7b5a680
 - [ ] 3.11 Phone-width viewport stays usable — not verified (same browser-automation resize limitation as 2.4); needs manual check
 - [ ] 3.12 Production walk-through at `https://kododo.dev/lassie/license-fields` after deploy succeeds — pending deploy
