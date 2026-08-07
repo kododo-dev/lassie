@@ -1,5 +1,4 @@
 using Lassie.Data.Auditing;
-using Lassie.Data.LicenseFields;
 using Lassie.Data.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,8 +8,6 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
 {
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<User> Users => Set<User>();
-    public DbSet<LicenseField> LicenseFields => Set<LicenseField>();
-    public DbSet<LicenseFieldOption> LicenseFieldOptions => Set<LicenseFieldOption>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,20 +23,6 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
-
-        modelBuilder.Entity<LicenseField>()
-            .HasIndex(f => f.Name)
-            .IsUnique();
-
-        modelBuilder.Entity<LicenseFieldOption>()
-            .HasIndex(o => new { o.LicenseFieldId, o.Value })
-            .IsUnique();
-
-        modelBuilder.Entity<LicenseField>()
-            .HasMany(f => f.Options)
-            .WithOne()
-            .HasForeignKey(o => o.LicenseFieldId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

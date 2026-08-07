@@ -3,7 +3,7 @@ project: Lassie
 version: 1
 status: draft
 created: 2026-08-04
-updated: 2026-08-06
+updated: 2026-08-07
 prd_version: 1
 main_goal: quality
 top_blocker: capacity
@@ -21,7 +21,9 @@ A company that ships its own product to many customer deployments has no central
 
 ## North star
 
-**S-02: Admin creates a license with a generated API key, and a client app can verify that license's status and field values through the API** — this is the smallest end-to-end flow that proves Lassie's core hypothesis (a working, non-hardware-locked license lifecycle), and it maps directly to both primary Success Criteria in the PRD.
+**S-02: Admin creates a license (name + optional expiry) with a generated API key, and a client app can verify that license's status through the API** — this is the smallest end-to-end flow that proves Lassie's core hypothesis (a working, non-hardware-locked license lifecycle), and it maps directly to both primary Success Criteria in the PRD.
+
+> Revised 2026-08-07: originally gated on `S-01` (admin-configurable license field schema) so license creation could render a dynamic field-values form. The user backed out of that scope for MVP — configurable fields are now nice-to-have, post-MVP (see `S-01` below and `## Parked`). `S-02` no longer depends on `S-01`; it's now unblocked by `F-01`/`F-02` alone, both already `done`.
 
 > A reader-facing note on what "north star" means here: it's the smallest end-to-end slice whose successful delivery proves the core product hypothesis — placed as early as its Prerequisites allow, because every other slice only matters if this one works. This gloss is stated once, here; it isn't repeated later in this document.
 
@@ -33,8 +35,8 @@ A company that ships its own product to many customer deployments has no central
 | ---- | ----------------------------------- | -------------------------------------------------------------------------------------- | -------------- | ---------------------------------- | -------- |
 | F-01 | `persistence-layer-foundation`      | (foundation) DB connectivity + migration tooling verified end-to-end                   | —              | FR-006 (enabler), Access Control   | done     |
 | F-02 | `admin-auth-foundation`             | (foundation) Admin can authenticate to the panel; unauthenticated requests are rejected | F-01           | FR-011, Access Control             | done     |
-| S-01 | `module-catalog-management`         | Admin can define license fields (name + data type) and their options                   | F-01, F-02     | FR-004                             | proposed |
-| S-02 | `license-creation-and-verification` | Admin creates a license + API key; client app verifies it via the API                  | S-01, F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | proposed |
+| S-01 | `module-catalog-management`         | *(parked, nice-to-have post-MVP)* Admin can define license fields (name + data type) and their options | F-01, F-02     | FR-004                             | parked |
+| S-02 | `license-creation-and-verification` | Admin creates a license (name + optional expiry) + API key; client app verifies it via the API | F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | proposed |
 | S-03 | `license-edit-with-audit-history`   | Admin edits a license, with prior versions retained for audit                          | S-02, F-01, F-02 | FR-006                             | proposed |
 | S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | proposed |
 | S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | proposed |
@@ -45,7 +47,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 
 | Stream | Theme                    | Chain                          | Note                                                                                   |
 | ------ | ------------------------- | ------------------------------- | --------------------------------------------------------------------------------------- |
-| A      | Foundations & north star  | `F-01` → `F-02` → `S-01` → `S-02` | Mandatory path to the north star; `F-01` is ready to start now.                       |
+| A      | Foundations & north star  | `F-01` → `F-02` → `S-02`        | Mandatory path to the north star. `F-01`/`F-02` are both `done` — `S-02` is unblocked, ready for `/10x-plan`. `S-01` no longer sits on this chain — see `## Parked`. |
 | B      | Audit & correction        | `S-03`                          | Joins Stream A at `S-02`. Sequenced first among the three post-launch branches — `quality` goal prioritizes protecting FR-006's audit guarantee as soon as licenses can be edited. |
 | C      | Lifecycle control         | `S-04`                          | Joins Stream A at `S-02`. Parallel with Streams B and D — no shared prerequisites beyond `S-02`. |
 | D      | Visibility                | `S-05`                          | Joins Stream A at `S-02`. Parallel with Streams B and C; lowest risk of the three (read-only). |
@@ -93,7 +95,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Slices
 
-### S-01: License field schema management
+### S-01: License field schema management *(parked, post-MVP nice-to-have)*
 
 - **Outcome:** Admin can define the set of fields a license carries — field name + data type (number / text / single-select), and for single-select fields, the list of allowed options. Ships with an example starting schema (e.g. a "License type" select field with regular/professional/enterprise options, a "Number of users" number field), but the schema itself is fully admin-managed, not fixed.
 - **Change ID:** `module-catalog-management` (kept as-is across two reformulations — see `context/changes/module-catalog-management/change.md` Notes for why)
@@ -102,17 +104,19 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** License creation (S-02) needs at least this schema (even if empty) to render its dynamic license-creation form against — sequenced first so S-02 isn't blocked. Larger than the original module-catalog scope: S-02 must now render a form and store values dynamically per the current field schema, rather than against a small set of fixed columns — flag this explicitly when `S-02` is planned.
-- **Status:** proposed
+- **Risk:** N/A while parked.
+- **Status:** parked
 
-> Revised 2026-08-06 (second iteration): first scoped as a multi-select "module" catalog (arbitrary feature flags per license), then simplified to a single-select "license type" categorization, then — after further user reconsideration — generalized into a fully admin-configurable field schema (this entry). See `context/changes/module-catalog-management/research.md` for the architecture (relational field-definition + field-option entities, not JSONB) and the closed set of supported data types (number/text/single-select, fixed in code).
+> Revised 2026-08-07 (third iteration): p1-p3 were actually implemented (`LicenseField`/`LicenseFieldOption` entities, migration, panel CRUD page — commits `a470efc`, `cd67a7e`, `7b5a680`), then the user backed out of full configurability for MVP — it added real scope to `S-02` (dynamic form rendering, dynamic per-license value storage) that isn't needed to prove the core hypothesis. Code reverted 2026-08-07 (entities/migration/CRUD page removed via a new forward `RemoveLicenseFields` migration; panel shell from `cd67a7e` kept — generic infra, not field-schema-specific). This slice is parked, not cancelled: `research.md`/`plan.md` in `context/changes/module-catalog-management/` stay as the ready-made starting point for when configurable fields are picked up post-MVP. See `context/changes/module-catalog-management/change.md` Notes for the full account.
+>
+> Previously revised 2026-08-06 (second iteration): first scoped as a multi-select "module" catalog (arbitrary feature flags per license), then simplified to a single-select "license type" categorization, then generalized into a fully admin-configurable field schema. See `context/changes/module-catalog-management/research.md` for the architecture (relational field-definition + field-option entities, not JSONB) and the closed set of supported data types (number/text/single-select, fixed in code).
 
 ### S-02: License creation and client-app verification (north star)
 
-- **Outcome:** Admin creates a license — label, values for the currently-defined license fields (S-01), optional expiry date — and the system generates a unique API key; a client app using that key gets back the license's validity and field values from the verification API.
+- **Outcome:** Admin creates a license — text label, optional expiry date — and the system generates a unique API key; a client app using that key gets back the license's validity from the verification API.
 - **Change ID:** `license-creation-and-verification`
 - **PRD refs:** FR-005, FR-008, FR-009, FR-010, US-01
-- **Prerequisites:** S-01, F-01, F-02
+- **Prerequisites:** F-01, F-02 (both `done` — this slice is unblocked)
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:** —
@@ -121,7 +125,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ### S-03: License edit with audit history
 
-- **Outcome:** Admin edits a license's field values or expiry date, and every prior version remains available for audit — no destructive overwrite.
+- **Outcome:** Admin edits a license's name or expiry date, and every prior version remains available for audit — no destructive overwrite.
 - **Change ID:** `license-edit-with-audit-history`
 - **PRD refs:** FR-006
 - **Prerequisites:** S-02, F-01, F-02
@@ -161,8 +165,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | ---------- | ------------------------------------ | ---------------------------------------------------------- | ---------------------- | ----------------------------------------- |
 | F-01       | `persistence-layer-foundation`       | Wire EF Core + migrations against the deployed Postgres DB | yes                    | Nothing blocks starting this today       |
 | F-02       | `admin-auth-foundation`              | Admin email/password login for the panel                   | no                      | Waiting on F-01                           |
-| S-01       | `module-catalog-management`          | Admin can define license fields and their options           | no                      | Waiting on F-01, F-02                     |
-| S-02       | `license-creation-and-verification`  | License creation + client-app verification API (north star) | no                    | Waiting on S-01; this is the north star   |
+| S-01       | `module-catalog-management`          | Admin can define license fields and their options           | no                      | **Parked** — post-MVP nice-to-have, not blocking S-02 anymore |
+| S-02       | `license-creation-and-verification`  | License creation + client-app verification API (north star) | **yes**               | Unblocked — F-01, F-02 both done; this is the north star |
 | S-03       | `license-edit-with-audit-history`    | License edit with audit-history retention                  | no                      | Waiting on S-02                           |
 | S-04       | `license-deactivate-reactivate`      | License deactivate / reactivate                            | no                      | Waiting on S-02; parallel with S-03, S-05 |
 | S-05       | `license-list-view`                  | License list view with status                              | no                      | Waiting on S-02; parallel with S-03, S-04 |
@@ -175,6 +179,7 @@ None. The PRD closed with zero open questions (`prd.md` → `## Open Questions`:
 
 Lifted from PRD `## Non-Goals` — MVP scope was already deliberately trimmed during shaping, so nothing new was added here during roadmap generation.
 
+- **License field schema management (`S-01`, `module-catalog-management`)** — Why parked: admin-configurable field schema (name + data type, options) added real scope to `S-02` (dynamic form rendering, dynamic per-license value storage) not needed to prove the core hypothesis. Parked 2026-08-07 after p1-p3 were implemented and reverted — nice-to-have, post-MVP. `research.md`/`plan.md` in `context/changes/module-catalog-management/` are the ready-made starting point when this is picked back up.
 - **Payment/invoicing integration** — Why parked: handled outside Lassie entirely (PRD §Non-Goals).
 - **Hardware-locking / offline crypto** — Why parked: a deliberate departure from the previous tool (Intellilock), which breaks down in cloud environments.
 - **Self-service portal for end customers** — Why parked: in MVP, only the supplier-side admin manages licenses.
