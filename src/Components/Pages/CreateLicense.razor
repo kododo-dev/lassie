@@ -1,0 +1,115 @@
+@page "/licenses/new"
+@attribute [Authorize]
+@layout MainLayout
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Lassie.Data
+@using Lassie.Data.Licenses
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.JSInterop
+@inject LassieDbContext DbContext
+@inject IJSRuntime JS
+
+<PageTitle>New License — Lassie</PageTitle>
+
+<h1>New License</h1>
+
+@if (createdLabel is null)
+{
+    <EditForm Model="Model" FormName="create-license" OnValidSubmit="HandleCreateAsync">
+        <DataAnnotationsValidator />
+        @if (errorMessage is not null)
+        {
+            <p>@errorMessage</p>
+        }
+        <div>
+            <label>Label</label>
+            <InputText @bind-Value="Model.Label" />
+        </div>
+        <div>
+            <label>Expires on (optional)</label>
+            <InputDate @bind-Value="Model.ExpiresOn" />
+        </div>
+        <button type="submit">Create License</button>
+    </EditForm>
+}
+else
+{
+    <p>License <strong>@createdLabel</strong> created@(createdExpiresOn is not null ? $" — expires on {createdExpiresOn:yyyy-MM-dd}" : "").</p>
+    <p>This is the only time the API key is shown. Copy it now — it cannot be retrieved again.</p>
+    <p>
+        <code>@(keyRevealed ? createdRawKey : Mask(createdRawKey!))</code>
+        <button type="button" @onclick="() => keyRevealed = !keyRevealed">@(keyRevealed ? "🙈" : "👁")</button>
+        <button type="button" @onclick="CopyKeyAsync">📋</button>
+    </p>
+    <button type="button" @onclick="ResetForm">Create another license</button>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private CreateLicenseFormModel Model { get; set; } = new();
+
+    private string? errorMessage;
+    private string? createdLabel;
+    private DateOnly? createdExpiresOn;
+    private string? createdRawKey;
+    private bool keyRevealed;
+
+    private async Task HandleCreateAsync()
+    {
+        var (rawKey, hash) = ApiKeyHasher.Generate();
+        var license = new License
+        {
+            Label = Model.Label,
+            ExpiresOn = Model.ExpiresOn,
+            ApiKeyHash = hash
+        };
+
+        DbContext.Licenses.Add(license);
+
+        try
+        {
+            await DbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23505" } pgEx)
+        {
+            DbContext.Entry(license).State = EntityState.Detached;
+            errorMessage = pgEx.ConstraintName == "IX_Licenses_Label"
+                ? "Ta etykieta już istnieje."
+                : "Coś poszło nie tak przy zapisie. Spróbuj ponownie.";
+            return;
+        }
+
+        createdLabel = license.Label;
+        createdExpiresOn = license.ExpiresOn;
+        createdRawKey = rawKey;
+    }
+
+    private async Task CopyKeyAsync()
+    {
+        if (createdRawKey is not null)
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", createdRawKey);
+        }
+    }
+
+    private void ResetForm()
+    {
+        errorMessage = null;
+        createdLabel = null;
+        createdExpiresOn = null;
+        createdRawKey = null;
+        keyRevealed = false;
+        Model = new();
+    }
+
+    private static string Mask(string key) => new string('•', key.Length);
+
+    private sealed class CreateLicenseFormModel
+    {
+        [Required]
+        public string Label { get; set; } = "";
+
+        public DateOnly? ExpiresOn { get; set; }
+    }
+}

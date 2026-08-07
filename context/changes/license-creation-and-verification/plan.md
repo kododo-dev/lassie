@@ -391,24 +391,24 @@ doesn't exist yet anywhere. Auto-applies on next deploy via the established
 
 #### Automated
 
-- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj`
-- [x] 1.2 No pending model changes: `dotnet ef migrations has-pending-model-changes --project src/lassie.csproj`
+- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj` — 1dc9e8c
+- [x] 1.2 No pending model changes: `dotnet ef migrations has-pending-model-changes --project src/lassie.csproj` — 1dc9e8c
 
 #### Manual
 
-- [x] 1.3 Local migration applies cleanly; `Licenses` table exists with both unique indexes
-- [x] 1.4 `ApiKeyHasher` round-trip and uniqueness sanity-checked locally
+- [x] 1.3 Local migration applies cleanly; `Licenses` table exists with both unique indexes — 1dc9e8c
+- [x] 1.4 `ApiKeyHasher` round-trip and uniqueness sanity-checked locally — 1dc9e8c
 
 ### Phase 2: Panel creation flow with reveal-once key
 
 #### Automated
 
-- [ ] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
 
 #### Manual
 
-- [ ] 2.2 Create license via `/licenses/new`; reveal/copy buttons work on the generated key
-- [ ] 2.3 Duplicate label shows a friendly error, not an unhandled exception
+- [x] 2.2 Create license via `/licenses/new`; reveal/copy buttons work on the generated key
+- [x] 2.3 Duplicate label shows a friendly error, not an unhandled exception
 - [ ] 2.4 Relative-link/path-base convention verified against the deployed `/lassie` prefix
 - [ ] 2.5 Panel usable on a phone-width viewport
 
