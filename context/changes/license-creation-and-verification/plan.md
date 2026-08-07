@@ -403,14 +403,14 @@ doesn't exist yet anywhere. Auto-applies on next deploy via the established
 
 #### Automated
 
-- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj` — 1ea0a61
 
 #### Manual
 
-- [x] 2.2 Create license via `/licenses/new`; reveal/copy buttons work on the generated key
-- [x] 2.3 Duplicate label shows a friendly error, not an unhandled exception
-- [ ] 2.4 Relative-link/path-base convention verified against the deployed `/lassie` prefix
-- [ ] 2.5 Panel usable on a phone-width viewport
+- [x] 2.2 Create license via `/licenses/new`; reveal/copy buttons work on the generated key — 1ea0a61
+- [x] 2.3 Duplicate label shows a friendly error, not an unhandled exception — 1ea0a61
+- [x] 2.4 Relative-link/path-base convention verified against the deployed `/lassie` prefix
+- [x] 2.5 Panel usable on a phone-width viewport
 
 ### Phase 3: Verification API endpoint (M2M)
 
