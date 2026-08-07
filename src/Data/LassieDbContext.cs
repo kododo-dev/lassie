@@ -1,4 +1,5 @@
 using Lassie.Data.Auditing;
+using Lassie.Data.Licenses;
 using Lassie.Data.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
 {
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<License> Licenses => Set<License>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +24,14 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
 
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<License>()
+            .HasIndex(l => l.Label)
+            .IsUnique();
+
+        modelBuilder.Entity<License>()
+            .HasIndex(l => l.ApiKeyHash)
             .IsUnique();
     }
 
