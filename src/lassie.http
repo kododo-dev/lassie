@@ -1,6 +1,18 @@
 @lassie_HostAddress = http://localhost:5092
+@apiKey = REPLACE_WITH_A_REAL_LICENSE_API_KEY
 
 GET {{lassie_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{lassie_HostAddress}}/api/license/verify
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+###
+
+GET {{lassie_HostAddress}}/api/license/verify
 Accept: application/json
 
 ###

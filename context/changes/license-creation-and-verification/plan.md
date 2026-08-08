@@ -409,14 +409,14 @@ doesn't exist yet anywhere. Auto-applies on next deploy via the established
 
 - [x] 2.2 Create license via `/licenses/new`; reveal/copy buttons work on the generated key — 1ea0a61
 - [x] 2.3 Duplicate label shows a friendly error, not an unhandled exception — 1ea0a61
-- [x] 2.4 Relative-link/path-base convention verified against the deployed `/lassie` prefix
-- [x] 2.5 Panel usable on a phone-width viewport
+- [x] 2.4 Relative-link/path-base convention verified against the deployed `/lassie` prefix — ded4a41
+- [x] 2.5 Panel usable on a phone-width viewport (indirect evidence — no true phone-width viewport achievable via available tooling; accepted based on local no-overflow check at ~603px + Pico.css's fluid-by-default layout) — ded4a41
 
 ### Phase 3: Verification API endpoint (M2M)
 
 #### Automated
 
-- [ ] 3.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 3.1 Build succeeds: `dotnet build src/lassie.csproj`
 
 #### Manual
 

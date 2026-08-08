@@ -1,5 +1,6 @@
 using Lassie.Components;
 using Lassie.Data;
+using Lassie.Data.Licenses;
 using Lassie.Data.Users;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -128,6 +129,32 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+// Machine-to-machine verification API: authenticates via a per-license API key sent as a
+// header (never a query string — query strings land in Caddy/ASP.NET Core access logs).
+// No .RequireAuthorization()/AuthenticationScheme — the handler validates the key itself,
+// so a missing/unrecognized key returns a plain 401 rather than a cookie-scheme redirect.
+// No broad try/catch: an unexpected failure (e.g. DB unreachable) must propagate to the
+// framework's default 5xx handling, never be coerced into `valid: false`.
+app.MapGet("/api/license/verify", async (HttpRequest request, LassieDbContext context) =>
+{
+    var apiKey = request.Headers["X-Api-Key"].ToString();
+    if (string.IsNullOrEmpty(apiKey))
+    {
+        return Results.Unauthorized();
+    }
+
+    var hash = ApiKeyHasher.Hash(apiKey);
+    var license = await context.Licenses.SingleOrDefaultAsync(l => l.ApiKeyHash == hash);
+    if (license is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var valid = license.ExpiresOn is null || license.ExpiresOn >= DateOnly.FromDateTime(DateTime.UtcNow);
+    return Results.Ok(new { valid });
+})
+.WithName("VerifyLicense");
 
 app.Run();
 
