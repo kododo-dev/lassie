@@ -416,13 +416,13 @@ doesn't exist yet anywhere. Auto-applies on next deploy via the established
 
 #### Automated
 
-- [x] 3.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 3.1 Build succeeds: `dotnet build src/lassie.csproj` — 9132033
 
 #### Manual
 
-- [x] 3.2 Valid key against deployed `/lassie/api/license/verify` returns `200 {"valid":true}`
-- [x] 3.3 Missing/bogus key returns `401`
-- [x] 3.4 Expired license's real key returns `200 {"valid":false}`
-- [x] 3.5 Response time measured comfortably under 500ms (steady-state ~110-140ms; one 545ms cold-start outlier on the very first post-deploy request, not representative)
-- [x] 3.6 Raw key confirmed absent from Caddy/ASP.NET Core access logs (checked both `caddy` and `lassie` container logs via SSH, 20min window, all 3 test keys — zero matches)
-- [x] 3.7 Code review confirms unexpected failures surface as `5xx`, never `valid:false`
+- [x] 3.2 Valid key against deployed `/lassie/api/license/verify` returns `200 {"valid":true}` — 6f54fe0
+- [x] 3.3 Missing/bogus key returns `401` — 6f54fe0
+- [x] 3.4 Expired license's real key returns `200 {"valid":false}` — 6f54fe0
+- [x] 3.5 Response time measured comfortably under 500ms (steady-state ~110-140ms; one 545ms cold-start outlier on the very first post-deploy request, not representative) — 6f54fe0
+- [x] 3.6 Raw key confirmed absent from Caddy/ASP.NET Core access logs (checked both `caddy` and `lassie` container logs via SSH, 20min window, all 3 test keys — zero matches) — 6f54fe0
+- [x] 3.7 Code review confirms unexpected failures surface as `5xx`, never `valid:false` — 6f54fe0
