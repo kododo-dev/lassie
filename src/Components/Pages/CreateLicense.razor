@@ -75,10 +75,14 @@ else
         {
             DbContext.Entry(license).State = EntityState.Detached;
             errorMessage = pgEx.ConstraintName == "IX_Licenses_Label"
-                ? "Ta etykieta już istnieje."
-                : "Coś poszło nie tak przy zapisie. Spróbuj ponownie.";
+                ? "This label already exists."
+                : "Something went wrong while saving. Please try again.";
             return;
         }
+
+        // Detach so repeated creations in one Blazor Server circuit (long-lived DbContext,
+        // not per-request) don't grow the change tracker unbounded.
+        DbContext.Entry(license).State = EntityState.Detached;
 
         createdLabel = license.Label;
         createdExpiresOn = license.ExpiresOn;
