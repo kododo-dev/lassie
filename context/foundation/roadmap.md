@@ -3,7 +3,7 @@ project: Lassie
 version: 1
 status: draft
 created: 2026-08-04
-updated: 2026-08-07
+updated: 2026-08-08
 prd_version: 1
 main_goal: quality
 top_blocker: capacity
@@ -36,7 +36,7 @@ A company that ships its own product to many customer deployments has no central
 | F-01 | `persistence-layer-foundation`      | (foundation) DB connectivity + migration tooling verified end-to-end                   | —              | FR-006 (enabler), Access Control   | done     |
 | F-02 | `admin-auth-foundation`             | (foundation) Admin can authenticate to the panel; unauthenticated requests are rejected | F-01           | FR-011, Access Control             | done     |
 | S-01 | `module-catalog-management`         | *(parked, nice-to-have post-MVP)* Admin can define license fields (name + data type) and their options | F-01, F-02     | FR-004                             | parked |
-| S-02 | `license-creation-and-verification` | Admin creates a license (name + optional expiry) + API key; client app verifies it via the API | F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | proposed |
+| S-02 | `license-creation-and-verification` | Admin creates a license (name + optional expiry) + API key; client app verifies it via the API | F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | done |
 | S-03 | `license-edit-with-audit-history`   | Admin edits a license, with prior versions retained for audit                          | S-02, F-01, F-02 | FR-006                             | proposed |
 | S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | proposed |
 | S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | proposed |
@@ -121,7 +121,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** This slice is what every client app depends on continuously once deployed, so the NFRs that matter most here — the API key never appearing in plaintext after generation, the <500ms response guardrail, and distinguishing "service unavailable" from "license invalid" (a network hiccup must never read as revocation) — deserve more scrutiny here than anywhere else on the roadmap. `main_goal: quality` weighs this.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: License edit with audit history
 
@@ -199,3 +199,4 @@ Lifted from PRD `## Non-Goals` — MVP scope was already deliberately trimmed du
 
 - **F-01: (foundation) DB connectivity + migration tooling verified end-to-end** — Archived 2026-08-05 → `context/archive/2026-08-04-persistence-layer-foundation/`. Lesson: —.
 - **F-02: (foundation) An admin can log in with email + password; requests to panel actions without a valid session are rejected. No role distinction (matches PRD's flat single-role model).** — Archived 2026-08-05 → `context/archive/2026-08-05-admin-auth-foundation/`. Lesson: ASP.NET Core Data Protection keys aren't persisted across container restarts (see `context/foundation/lessons.md`).
+- **S-02: Admin creates a license — text label, optional expiry date — and the system generates a unique API key; a client app using that key gets back the license's validity from the verification API.** — Archived 2026-08-08 → `context/archive/2026-08-07-license-creation-and-verification/`. Lesson: —.
