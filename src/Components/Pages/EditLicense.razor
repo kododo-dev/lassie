@@ -58,9 +58,27 @@ else
     private string? errorMessage;
     private string? successMessage;
 
-    protected override async Task OnInitializedAsync()
+    // OnParametersSetAsync (not OnInitializedAsync): Blazor reuses this component instance
+    // across navigations between two /licenses/{Id}/edit URLs, so a load that only ran once
+    // in OnInitializedAsync would keep editing the license for the previous Id. Guarding on
+    // license.Id == Id keeps this a no-op on unrelated parameter-set re-runs.
+    protected override async Task OnParametersSetAsync()
     {
+        if (license is not null && license.Id == Id)
+        {
+            return;
+        }
+
+        if (license is not null)
+        {
+            // Detach the previously-loaded license (switching Id within the same circuit)
+            // so the long-lived per-circuit DbContext doesn't accumulate tracked entities.
+            DbContext.Entry(license).State = EntityState.Detached;
+        }
+
         license = await DbContext.Licenses.SingleOrDefaultAsync(l => l.Id == Id);
+        errorMessage = null;
+        successMessage = null;
         if (license is not null)
         {
             Model = new EditLicenseFormModel

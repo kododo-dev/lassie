@@ -1,3 +1,4 @@
+using System.Reflection;
 using Lassie.Data.Auditing;
 using Lassie.Data.Licenses;
 using Lassie.Data.Users;
@@ -56,7 +57,20 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
 
         foreach (var entry in auditableEntries)
         {
-            var snapshot = System.Text.Json.JsonSerializer.Serialize(entry.OriginalValues.ToObject());
+            var entityType = entry.Entity.GetType();
+            var snapshotValues = new Dictionary<string, object?>();
+            foreach (var property in entry.OriginalValues.Properties)
+            {
+                var clrProperty = entityType.GetProperty(property.Name);
+                if (clrProperty?.GetCustomAttribute<NotAuditedAttribute>() is not null)
+                {
+                    continue;
+                }
+
+                snapshotValues[property.Name] = entry.OriginalValues[property];
+            }
+
+            var snapshot = System.Text.Json.JsonSerializer.Serialize(snapshotValues);
             var primaryKey = entry.Properties.First(p => p.Metadata.IsPrimaryKey()).CurrentValue;
 
             AuditLogs.Add(new AuditLog
