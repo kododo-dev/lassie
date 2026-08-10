@@ -1,0 +1,112 @@
+@page "/licenses/{Id:long}/edit"
+@attribute [Authorize]
+@layout MainLayout
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Lassie.Data
+@using Lassie.Data.Licenses
+@using Microsoft.EntityFrameworkCore
+@inject LassieDbContext DbContext
+
+<PageTitle>Edit License — Lassie</PageTitle>
+
+<h1>Edit License</h1>
+
+@if (license is null)
+{
+    <p>License not found.</p>
+    <a href="/">Back</a>
+}
+else
+{
+    <EditForm Model="Model" FormName="edit-license" OnValidSubmit="HandleSaveAsync">
+        <DataAnnotationsValidator />
+        @if (errorMessage is not null)
+        {
+            <p>@errorMessage</p>
+        }
+        @if (successMessage is not null)
+        {
+            <p>@successMessage</p>
+        }
+        <div>
+            <label>Label</label>
+            <InputText @bind-Value="Model.Label" />
+        </div>
+        <div>
+            <label>Expires on (optional)</label>
+            <InputDate @bind-Value="Model.ExpiresOn" />
+        </div>
+        <button type="submit">Save</button>
+        <a href="/">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private EditLicenseFormModel Model { get; set; } = new();
+
+    // Loaded via a query (not attach-and-mark-modified) and kept as the same tracked
+    // instance through to SaveChangesAsync, so EF's OriginalValues — which the generic
+    // audit mechanism in LassieDbContext reads — reflects the true pre-edit row. See
+    // context/foundation/lessons.md ("Audit snapshots require load-before-mutate").
+    private License? license;
+
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        license = await DbContext.Licenses.SingleOrDefaultAsync(l => l.Id == Id);
+        if (license is not null)
+        {
+            Model = new EditLicenseFormModel
+            {
+                Label = license.Label,
+                ExpiresOn = license.ExpiresOn
+            };
+        }
+    }
+
+    private async Task HandleSaveAsync()
+    {
+        if (license is null)
+        {
+            return;
+        }
+
+        license.Label = Model.Label;
+        license.ExpiresOn = Model.ExpiresOn;
+
+        try
+        {
+            await DbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23505" } pgEx)
+        {
+            // No reload/detach here (unlike CreateLicense's Added-entity case): license
+            // stays Modified with its correct original values from the initial load, so a
+            // retry with a different label just re-mutates the same tracked instance.
+            errorMessage = pgEx.ConstraintName == "IX_Licenses_Label"
+                ? "This label already exists."
+                : "Something went wrong while saving. Please try again.";
+            successMessage = null;
+            return;
+        }
+
+        errorMessage = null;
+        successMessage = $"License \"{license.Label}\" updated" +
+            (license.ExpiresOn is not null ? $" — expires on {license.ExpiresOn:yyyy-MM-dd}." : ".");
+    }
+
+    private sealed class EditLicenseFormModel
+    {
+        [Required]
+        public string Label { get; set; } = "";
+
+        public DateOnly? ExpiresOn { get; set; }
+    }
+}
