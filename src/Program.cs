@@ -151,7 +151,7 @@ app.MapGet("/api/license/verify", async (HttpRequest request, LassieDbContext co
         return Results.Unauthorized();
     }
 
-    var valid = license.ExpiresOn is null || license.ExpiresOn >= DateOnly.FromDateTime(DateTime.UtcNow);
+    var valid = license.GetStatus() == LicenseStatus.Active;
     return Results.Ok(new { valid });
 })
 .WithName("VerifyLicense");

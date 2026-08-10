@@ -2,6 +2,12 @@ using Lassie.Data.Auditing;
 
 namespace Lassie.Data.Licenses;
 
+public enum LicenseStatus
+{
+    Active,
+    Expired
+}
+
 public class License : IAuditable
 {
     public long Id { get; set; }
@@ -10,4 +16,9 @@ public class License : IAuditable
 
     [NotAudited]
     public required string ApiKeyHash { get; set; }
+
+    public LicenseStatus GetStatus() =>
+        ExpiresOn is null || ExpiresOn >= DateOnly.FromDateTime(DateTime.UtcNow)
+            ? LicenseStatus.Active
+            : LicenseStatus.Expired;
 }
