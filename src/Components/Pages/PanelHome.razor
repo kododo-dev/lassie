@@ -35,7 +35,7 @@ else
                 {
                     <tr>
                         <td>@license.Label</td>
-                        <td>@license.GetStatus()</td>
+                        <td>@license.Status</td>
                         <td>@(license.ExpiresOn is not null ? license.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")</td>
                         <td><a href="licenses/@license.Id/edit">Edit</a></td>
                     </tr>
@@ -57,6 +57,6 @@ else
         var state = await AuthState;
         userEmail = state.User.Identity?.Name;
 
-        licenses = await DbContext.Licenses.OrderBy(l => l.Label).ToListAsync();
+        licenses = await DbContext.Licenses.AsNoTracking().OrderBy(l => l.Label).ToListAsync();
     }
 }

@@ -17,7 +17,7 @@ public class License : IAuditable
     [NotAudited]
     public required string ApiKeyHash { get; set; }
 
-    public LicenseStatus GetStatus() =>
+    public LicenseStatus Status =>
         ExpiresOn is null || ExpiresOn >= DateOnly.FromDateTime(DateTime.UtcNow)
             ? LicenseStatus.Active
             : LicenseStatus.Expired;
