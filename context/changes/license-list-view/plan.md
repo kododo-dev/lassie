@@ -266,14 +266,14 @@ migration. No schema change anywhere in this plan.
 
 #### Automated
 
-- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj` — 92d42e5
 
 #### Manual
 
-- [x] 2.2 Empty state renders with working link to /licenses/new
-- [x] 2.3 Populated list sorts by label and shows correct status/expiry per license
-- [x] 2.4 List status badges agree with /api/license/verify for the same licenses
-- [x] 2.5 Edit link on each row navigates to the correct pre-filled edit page
-- [x] 2.6 Small/mobile viewport keeps the table usable (horizontal scroll, no broken layout)
-- [x] 2.7 Logged-out access to / redirects to /login
-- [x] 2.8 "Logged in as X" / "Log out" still work
+- [x] 2.2 Empty state renders with working link to /licenses/new — 92d42e5
+- [x] 2.3 Populated list sorts by label and shows correct status/expiry per license — 92d42e5
+- [x] 2.4 List status badges agree with /api/license/verify for the same licenses — 92d42e5
+- [x] 2.5 Edit link on each row navigates to the correct pre-filled edit page — 92d42e5
+- [x] 2.6 Small/mobile viewport keeps the table usable (horizontal scroll, no broken layout) — 92d42e5
+- [x] 2.7 Logged-out access to / redirects to /login — 92d42e5
+- [x] 2.8 "Logged in as X" / "Log out" still work — 92d42e5
