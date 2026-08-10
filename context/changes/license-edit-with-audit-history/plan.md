@@ -199,15 +199,15 @@ or required for this phase.
 
 #### Automated
 
-- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj` — 4cd1c12
 
 #### Manual
 
-- [x] 1.2 Edit page pre-fills current label/expiry from an existing license
-- [x] 1.3 Successful edit updates the License row and writes exactly one correct AuditLog row
-- [x] 1.4 Clearing expiry back to null works
-- [x] 1.5 Label-uniqueness conflict shows generic message, retry succeeds
-- [x] 1.6 No-op submit writes no new AuditLog row
-- [x] 1.7 Non-existent id renders "not found", no exception
-- [x] 1.8 Cancel link returns without saving
-- [x] 1.9 Logged-out access redirects to /login
+- [x] 1.2 Edit page pre-fills current label/expiry from an existing license — 4cd1c12
+- [x] 1.3 Successful edit updates the License row and writes exactly one correct AuditLog row — 4cd1c12
+- [x] 1.4 Clearing expiry back to null works — 4cd1c12
+- [x] 1.5 Label-uniqueness conflict shows generic message, retry succeeds — 4cd1c12
+- [x] 1.6 No-op submit writes no new AuditLog row — 4cd1c12
+- [x] 1.7 Non-existent id renders "not found", no exception — 4cd1c12
+- [x] 1.8 Cancel link returns without saving — 4cd1c12
+- [x] 1.9 Logged-out access redirects to /login — 4cd1c12
