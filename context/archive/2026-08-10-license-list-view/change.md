@@ -1,10 +1,10 @@
 ---
 change_id: license-list-view
 title: License list view
-status: impl_reviewed
+status: archived
 created: 2026-08-10
 updated: 2026-08-10
-archived_at: null
+archived_at: 2026-08-10T20:07:06Z
 ---
 
 ## Notes

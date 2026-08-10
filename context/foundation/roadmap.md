@@ -39,7 +39,7 @@ A company that ships its own product to many customer deployments has no central
 | S-02 | `license-creation-and-verification` | Admin creates a license (name + optional expiry) + API key; client app verifies it via the API | F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | done |
 | S-03 | `license-edit-with-audit-history`   | Admin edits a license, with prior versions retained for audit                          | S-02, F-01, F-02 | FR-006                             | done |
 | S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | proposed |
-| S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | proposed |
+| S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | done |
 
 ## Streams
 
@@ -157,7 +157,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Read-only surface; lowest risk of the three parallel branches, needs only S-02's data to exist.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -201,3 +201,4 @@ Lifted from PRD `## Non-Goals` — MVP scope was already deliberately trimmed du
 - **F-02: (foundation) An admin can log in with email + password; requests to panel actions without a valid session are rejected. No role distinction (matches PRD's flat single-role model).** — Archived 2026-08-05 → `context/archive/2026-08-05-admin-auth-foundation/`. Lesson: ASP.NET Core Data Protection keys aren't persisted across container restarts (see `context/foundation/lessons.md`).
 - **S-02: Admin creates a license — text label, optional expiry date — and the system generates a unique API key; a client app using that key gets back the license's validity from the verification API.** — Archived 2026-08-08 → `context/archive/2026-08-07-license-creation-and-verification/`. Lesson: —.
 - **S-03: Admin edits a license's name or expiry date, and every prior version remains available for audit — no destructive overwrite.** — Archived 2026-08-10 → `context/archive/2026-08-08-license-edit-with-audit-history/`. Lesson: —.
+- **S-05: Admin views the list of licenses and each one's current status.** — Archived 2026-08-10 → `context/archive/2026-08-10-license-list-view/`. Lesson: —.
