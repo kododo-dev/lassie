@@ -2,22 +2,61 @@
 @attribute [Authorize]
 @layout MainLayout
 @rendermode InteractiveServer
+@using Lassie.Data
+@using Lassie.Data.Licenses
+@using Microsoft.EntityFrameworkCore
+@inject LassieDbContext DbContext
 
 <PageTitle>Lassie</PageTitle>
 
-<h1>Lassie admin panel — placeholder</h1>
+<h1>Lassie admin panel</h1>
 <p>Logged in as @userEmail</p>
 <a href="logout">Log out</a>
+
+@if (licenses.Count == 0)
+{
+    <p>No licenses yet.</p>
+    <a href="licenses/new">Create a license</a>
+}
+else
+{
+    <figure style="overflow-x: auto">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Label</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Expires</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var license in licenses)
+                {
+                    <tr>
+                        <td>@license.Label</td>
+                        <td>@license.GetStatus()</td>
+                        <td>@(license.ExpiresOn is not null ? license.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")</td>
+                        <td><a href="licenses/@license.Id/edit">Edit</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </figure>
+}
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private string? userEmail;
+    private List<License> licenses = new();
 
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthState;
         userEmail = state.User.Identity?.Name;
+
+        licenses = await DbContext.Licenses.OrderBy(l => l.Label).ToListAsync();
     }
 }

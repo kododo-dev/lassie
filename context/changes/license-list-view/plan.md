@@ -251,29 +251,29 @@ migration. No schema change anywhere in this plan.
 
 #### Automated
 
-- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj` — 62c7fb0
 
 #### Manual
 
-- [ ] 1.2 No-expiry license verifies as valid
-- [ ] 1.3 Future-expiry license verifies as valid
-- [ ] 1.4 Past-expiry license verifies as invalid
-- [ ] 1.5 Exactly-today-expiry license still verifies as valid (inclusive boundary preserved)
-- [ ] 1.6 Missing/unrecognized API key still returns 401
-- [ ] 1.7 Response time still well under the 500ms NFR guardrail
+- [x] 1.2 No-expiry license verifies as valid — 62c7fb0
+- [x] 1.3 Future-expiry license verifies as valid — 62c7fb0
+- [x] 1.4 Past-expiry license verifies as invalid — 62c7fb0
+- [x] 1.5 Exactly-today-expiry license still verifies as valid (inclusive boundary preserved) — 62c7fb0
+- [x] 1.6 Missing/unrecognized API key still returns 401 — 62c7fb0
+- [x] 1.7 Response time still well under the 500ms NFR guardrail — 62c7fb0
 
 ### Phase 2: License list page
 
 #### Automated
 
-- [ ] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
 
 #### Manual
 
-- [ ] 2.2 Empty state renders with working link to /licenses/new
-- [ ] 2.3 Populated list sorts by label and shows correct status/expiry per license
-- [ ] 2.4 List status badges agree with /api/license/verify for the same licenses
-- [ ] 2.5 Edit link on each row navigates to the correct pre-filled edit page
-- [ ] 2.6 Small/mobile viewport keeps the table usable (horizontal scroll, no broken layout)
-- [ ] 2.7 Logged-out access to / redirects to /login
-- [ ] 2.8 "Logged in as X" / "Log out" still work
+- [x] 2.2 Empty state renders with working link to /licenses/new
+- [x] 2.3 Populated list sorts by label and shows correct status/expiry per license
+- [x] 2.4 List status badges agree with /api/license/verify for the same licenses
+- [x] 2.5 Edit link on each row navigates to the correct pre-filled edit page
+- [x] 2.6 Small/mobile viewport keeps the table usable (horizontal scroll, no broken layout)
+- [x] 2.7 Logged-out access to / redirects to /login
+- [x] 2.8 "Logged in as X" / "Log out" still work
