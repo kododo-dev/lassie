@@ -562,11 +562,11 @@ None — no data model, schema, or stored data is touched by this change.
 
 #### Automated
 
-- [x] 5.1 dotnet build src/lassie.csproj succeeds
+- [x] 5.1 dotnet build src/lassie.csproj succeeds — e0cf71b
 
 #### Manual
 
-- [x] 5.2 Login page renders as a centered, styled card consistent with the rest of the app
-- [x] 5.3 Login still works with valid/invalid credentials
-- [x] 5.4 Page renders and form is submittable before Blazor JS finishes loading
-- [x] 5.5 Usable at 375px viewport width
+- [x] 5.2 Login page renders as a centered, styled card consistent with the rest of the app — e0cf71b
+- [x] 5.3 Login still works with valid/invalid credentials — e0cf71b
+- [x] 5.4 Page renders and form is submittable before Blazor JS finishes loading — e0cf71b
+- [x] 5.5 Usable at 375px viewport width — e0cf71b
