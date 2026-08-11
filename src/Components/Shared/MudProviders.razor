@@ -1,0 +1,22 @@
+@implements IDisposable
+@inject ThemeState ThemeState
+
+@* MudBlazor's providers must render in the same render scope as the components that
+   use them. With per-page @rendermode (required here so Login.razor can stay static
+   SSR), a single instance in MainLayout is NOT in scope for popover-consuming
+   components (MudDatePicker, MudSelect, ...) on the page — hence one <MudProviders />
+   per interactive page instead of a single copy in the shared layout. *@
+<MudThemeProvider Theme="ThemeState.Theme" IsDarkMode="ThemeState.IsDarkMode" />
+<MudPopoverProvider />
+
+@code {
+    protected override void OnInitialized()
+    {
+        ThemeState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        ThemeState.OnChange -= StateHasChanged;
+    }
+}

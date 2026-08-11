@@ -13,23 +13,27 @@
 
 <PageTitle>Log in — Lassie</PageTitle>
 
-<h1>Log in</h1>
+<div class="auth-page">
+    <div class="auth-card">
+        <h1>Log in</h1>
 
-<EditForm Model="Model" FormName="login" OnValidSubmit="HandleLoginAsync">
-    @if (errorMessage is not null)
-    {
-        <p>@errorMessage</p>
-    }
-    <div>
-        <label>Email</label>
-        <InputText @bind-Value="Model.Email" />
+        <EditForm Model="Model" FormName="login" OnValidSubmit="HandleLoginAsync">
+            @if (errorMessage is not null)
+            {
+                <p class="auth-error">@errorMessage</p>
+            }
+            <div>
+                <label>Email</label>
+                <InputText @bind-Value="Model.Email" />
+            </div>
+            <div>
+                <label>Password</label>
+                <InputText type="password" @bind-Value="Model.Password" />
+            </div>
+            <button type="submit">Log in</button>
+        </EditForm>
     </div>
-    <div>
-        <label>Password</label>
-        <InputText type="password" @bind-Value="Model.Password" />
-    </div>
-    <button type="submit">Log in</button>
-</EditForm>
+</div>
 
 @code {
     [SupplyParameterFromForm]

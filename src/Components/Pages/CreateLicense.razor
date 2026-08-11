@@ -3,6 +3,7 @@
 @layout MainLayout
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
+@using Lassie.Components.Shared
 @using Lassie.Data
 @using Lassie.Data.Licenses
 @using Microsoft.EntityFrameworkCore
@@ -11,6 +12,8 @@
 @inject IJSRuntime JS
 
 <PageTitle>New License — Lassie</PageTitle>
+
+<MudProviders />
 
 <h1>New License</h1>
 

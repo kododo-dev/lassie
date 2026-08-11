@@ -1,3 +1,62 @@
-/* Hand-authored overrides on top of MudBlazor's theme. Populated in Phase 5 with
-   auth-page/auth-card styles for the login screen, which cannot use MudBlazor
-   components (see plan.md's Critical Implementation Details). */
+/* Hand-authored overrides on top of MudBlazor's theme. The login page (Login.razor)
+   cannot use MudBlazor components — it must stay on the static-SSR rendering path for
+   HttpContext.SignInAsync to work (see plan.md's Critical Implementation Details) — so
+   these rules hand-match MudBlazor's default light-theme palette values instead
+   (Primary #594AE2, Error #F44336, TextPrimary #424242, Surface #FFFFFF, 4px border
+   radius — verified against MudBlazor/MudBlazor's Palette.cs / LayoutProperties.cs). */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: #FFFFFF;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.auth-card h1 {
+    color: #594AE2;
+    margin-top: 0;
+}
+
+.auth-card label {
+    display: block;
+    color: #424242;
+    margin-bottom: 4px;
+}
+
+.auth-card div {
+    margin-bottom: 16px;
+}
+
+.auth-card input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+}
+
+.auth-card button {
+    background: #594AE2;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.auth-error {
+    color: #F44336;
+    margin-bottom: 16px;
+}

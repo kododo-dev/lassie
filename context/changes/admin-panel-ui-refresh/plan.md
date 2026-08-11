@@ -548,25 +548,25 @@ None — no data model, schema, or stored data is touched by this change.
 
 #### Automated
 
-- [x] 4.1 dotnet build src/lassie.csproj succeeds
-- [x] 4.2 Empty-Label validation error still triggers on create form
+- [x] 4.1 dotnet build src/lassie.csproj succeeds — 508c2aa
+- [x] 4.2 Empty-Label validation error still triggers on create form — 508c2aa
 
 #### Manual
 
-- [x] 4.3 Create and edit forms visually consistent with redesigned app
-- [x] 4.4 Error and success alerts clearly distinguishable by color
-- [x] 4.5 Reveal-key eye/copy icons behave identically to before
-- [x] 4.6 Both forms usable at 375px viewport width
+- [x] 4.3 Create and edit forms visually consistent with redesigned app — 508c2aa
+- [x] 4.4 Error and success alerts clearly distinguishable by color — 508c2aa
+- [x] 4.5 Reveal-key eye/copy icons behave identically to before — 508c2aa
+- [x] 4.6 Both forms usable at 375px viewport width — 508c2aa
 
 ### Phase 5: Login Page
 
 #### Automated
 
-- [ ] 5.1 dotnet build src/lassie.csproj succeeds
+- [x] 5.1 dotnet build src/lassie.csproj succeeds
 
 #### Manual
 
-- [ ] 5.2 Login page renders as a centered, styled card consistent with the rest of the app
-- [ ] 5.3 Login still works with valid/invalid credentials
-- [ ] 5.4 Page renders and form is submittable before Blazor JS finishes loading
-- [ ] 5.5 Usable at 375px viewport width
+- [x] 5.2 Login page renders as a centered, styled card consistent with the rest of the app
+- [x] 5.3 Login still works with valid/invalid credentials
+- [x] 5.4 Page renders and form is submittable before Blazor JS finishes loading
+- [x] 5.5 Usable at 375px viewport width

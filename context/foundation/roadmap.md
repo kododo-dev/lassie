@@ -3,7 +3,7 @@ project: Lassie
 version: 1
 status: draft
 created: 2026-08-04
-updated: 2026-08-10
+updated: 2026-08-11
 prd_version: 1
 main_goal: quality
 top_blocker: capacity
@@ -40,6 +40,7 @@ A company that ships its own product to many customer deployments has no central
 | S-03 | `license-edit-with-audit-history`   | Admin edits a license, with prior versions retained for audit                          | S-02, F-01, F-02 | FR-006                             | done |
 | S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | proposed |
 | S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | done |
+| S-06 | `admin-panel-ui-refresh`            | Admin uses a panel that's visually polished and pleasant, not just functional — every screen shipped so far (login, list, create/edit, audit history) | F-02, S-02, S-03, S-05 | NFR (panel usability/readability) | proposed |
 
 ## Streams
 
@@ -51,6 +52,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | B      | Audit & correction        | `S-03`                          | Joins Stream A at `S-02`. Sequenced first among the three post-launch branches — `quality` goal prioritizes protecting FR-006's audit guarantee as soon as licenses can be edited. |
 | C      | Lifecycle control         | `S-04`                          | Joins Stream A at `S-02`. Parallel with Streams B and D — no shared prerequisites beyond `S-02`. |
 | D      | Visibility                | `S-05`                          | Joins Stream A at `S-02`. Parallel with Streams B and C; lowest risk of the three (read-only). |
+| E      | Polish & UX                | `S-02, S-03, S-05` → `S-06`     | Cross-cutting — redesigns every panel screen shipped by Streams A/B/D at once, so it's sequenced after they exist rather than joining at a single point. Independent of `S-04` (Stream C); can land before or after it. |
 
 ## Baseline
 
@@ -159,6 +161,19 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Read-only surface; lowest risk of the three parallel branches, needs only S-02's data to exist.
 - **Status:** done
 
+### S-06: Admin panel UI refresh
+
+- **Outcome:** The admin panel looks and feels intentional — clean layout, consistent spacing/typography, clear visual hierarchy — instead of the current bare-bones styling. Covers every screen shipped so far: login (F-02), license create/edit (S-02/S-03), audit history (S-03), and the license list (S-05). Deactivate/reactivate (S-04) picks up the same design once it ships, whether S-06 lands before or after it.
+- **Change ID:** `admin-panel-ui-refresh`
+- **PRD refs:** Non-Functional Requirements — "Panel administracyjny jest użyteczny i czytelny zarówno na ekranie desktopowym, jak i na małym ekranie (smartfon) — responsywny, bez utraty funkcjonalności" and "Panel administracyjny jest użyteczny na dwóch najnowszych wersjach głównych przeglądarek". Note: those NFRs mandate usable/responsive/legible, not "elegant" — this slice goes beyond the letter of the PRD on the user's explicit request (2026-08-11), in the spirit of the same NFR.
+- **Prerequisites:** F-02, S-02, S-03, S-05 (the screens being redesigned must exist first — all four are `done`, so this slice is unblocked)
+- **Parallel with:** S-04 (independent — a state-toggle feature vs. a styling pass; either order works, but landing S-06 after S-04 avoids re-touching S-04's markup twice)
+- **Blockers:** —
+- **Unknowns:**
+  - No visual-design direction (colors, typography, component library) has been chosen yet — currently the panel is unstyled/minimal (per `## Baseline`, no CSS framework picked). — Owner: user. Block: no (a sensible lightweight default — e.g. a small CSS framework or component kit appropriate to the panel's tech stack — can be proposed at `/10x-plan` time; naming the gap here just prevents it from being silently invented deep in implementation).
+- **Risk:** Low functional risk (pure presentation layer, no data/behavior change), but touches every existing screen — worth a visual pass-through of the whole panel after implementation rather than screen-by-screen sign-off, to catch inconsistencies between screens.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                   |
@@ -170,6 +185,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-03       | `license-edit-with-audit-history`    | License edit with audit-history retention                  | no                      | Waiting on S-02                           |
 | S-04       | `license-deactivate-reactivate`      | License deactivate / reactivate                            | no                      | Waiting on S-02; parallel with S-03, S-05 |
 | S-05       | `license-list-view`                  | License list view with status                              | no                      | Waiting on S-02; parallel with S-03, S-04 |
+| S-06       | `admin-panel-ui-refresh`             | Polished, elegant visual redesign of the admin panel        | **yes**                | Unblocked — F-02, S-02, S-03, S-05 all done; parallel with S-04 |
 
 ## Open Roadmap Questions
 
