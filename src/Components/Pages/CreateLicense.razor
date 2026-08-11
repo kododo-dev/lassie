@@ -20,29 +20,25 @@
         <DataAnnotationsValidator />
         @if (errorMessage is not null)
         {
-            <p>@errorMessage</p>
+            <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
         }
-        <div>
-            <label>Label</label>
-            <InputText @bind-Value="Model.Label" />
-        </div>
-        <div>
-            <label>Expires on (optional)</label>
-            <InputDate @bind-Value="Model.ExpiresOn" />
-        </div>
-        <button type="submit">Create License</button>
+        <MudTextField @bind-Value="Model.Label" Label="Label" Class="mb-4" />
+        <MudDatePicker @bind-Date="ExpiresOnDateTime" Label="Expires on (optional)" Class="mb-4" />
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Create License</MudButton>
     </EditForm>
 }
 else
 {
-    <p>License <strong>@createdLabel</strong> created@(createdExpiresOn is not null ? $" — expires on {createdExpiresOn:yyyy-MM-dd}" : "").</p>
-    <p>This is the only time the API key is shown. Copy it now — it cannot be retrieved again.</p>
-    <p>
+    <MudText Class="mb-2">License <strong>@createdLabel</strong> created@(createdExpiresOn is not null ? $" — expires on {createdExpiresOn:yyyy-MM-dd}" : "").</MudText>
+    <MudText Class="mb-4">This is the only time the API key is shown. Copy it now — it cannot be retrieved again.</MudText>
+    <MudPaper Class="pa-4 mb-4 d-flex align-center" Outlined="true">
         <code>@(keyRevealed ? createdRawKey : Mask(createdRawKey!))</code>
-        <button type="button" @onclick="() => keyRevealed = !keyRevealed">@(keyRevealed ? "🙈" : "👁")</button>
-        <button type="button" @onclick="CopyKeyAsync">📋</button>
-    </p>
-    <button type="button" @onclick="ResetForm">Create another license</button>
+        <MudIconButton Class="ml-2"
+                       Icon="@(keyRevealed ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                       OnClick="@(() => keyRevealed = !keyRevealed)" />
+        <MudIconButton Class="ml-1" Icon="@Icons.Material.Filled.ContentCopy" OnClick="CopyKeyAsync" />
+    </MudPaper>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetForm">Create another license</MudButton>
 }
 
 @code {
@@ -54,6 +50,14 @@ else
     private DateOnly? createdExpiresOn;
     private string? createdRawKey;
     private bool keyRevealed;
+
+    // MudDatePicker binds DateTime?, not DateOnly? (no native DateOnly support as of
+    // MudBlazor 9.x) — bridge through this wrapper rather than changing the form model.
+    private DateTime? ExpiresOnDateTime
+    {
+        get => Model.ExpiresOn?.ToDateTime(TimeOnly.MinValue);
+        set => Model.ExpiresOn = value is null ? null : DateOnly.FromDateTime(value.Value);
+    }
 
     private async Task HandleCreateAsync()
     {

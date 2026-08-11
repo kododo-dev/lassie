@@ -535,28 +535,28 @@ None — no data model, schema, or stored data is touched by this change.
 
 #### Automated
 
-- [x] 3.1 dotnet build src/lassie.csproj succeeds
+- [x] 3.1 dotnet build src/lassie.csproj succeeds — 4bb7c10
 
 #### Manual
 
-- [x] 3.2 License list shows colored status chips
-- [x] 3.3 Empty state looks intentional
-- [x] 3.4 Edit action still navigates correctly
-- [x] 3.5 Table usable at 375px viewport width
+- [x] 3.2 License list shows colored status chips — 4bb7c10
+- [x] 3.3 Empty state looks intentional — 4bb7c10
+- [x] 3.4 Edit action still navigates correctly — 4bb7c10
+- [x] 3.5 Table usable at 375px viewport width — 4bb7c10
 
 ### Phase 4: Create/Edit License Forms
 
 #### Automated
 
-- [ ] 4.1 dotnet build src/lassie.csproj succeeds
-- [ ] 4.2 Empty-Label validation error still triggers on create form
+- [x] 4.1 dotnet build src/lassie.csproj succeeds
+- [x] 4.2 Empty-Label validation error still triggers on create form
 
 #### Manual
 
-- [ ] 4.3 Create and edit forms visually consistent with redesigned app
-- [ ] 4.4 Error and success alerts clearly distinguishable by color
-- [ ] 4.5 Reveal-key eye/copy icons behave identically to before
-- [ ] 4.6 Both forms usable at 375px viewport width
+- [x] 4.3 Create and edit forms visually consistent with redesigned app
+- [x] 4.4 Error and success alerts clearly distinguishable by color
+- [x] 4.5 Reveal-key eye/copy icons behave identically to before
+- [x] 4.6 Both forms usable at 375px viewport width
 
 ### Phase 5: Login Page
 
