@@ -1,0 +1,15 @@
+@using Lassie.Data.Licenses
+
+<MudChip T="string" Size="Size.Small" Color="@ChipColor">@Status</MudChip>
+
+@code {
+    [Parameter]
+    public LicenseStatus Status { get; set; }
+
+    private Color ChipColor => Status switch
+    {
+        LicenseStatus.Active => Color.Success,
+        LicenseStatus.Expired => Color.Default,
+        _ => Color.Default
+    };
+}

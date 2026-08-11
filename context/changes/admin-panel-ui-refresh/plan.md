@@ -522,27 +522,27 @@ None — no data model, schema, or stored data is touched by this change.
 
 #### Automated
 
-- [x] 2.1 dotnet build src/lassie.csproj succeeds
+- [x] 2.1 dotnet build src/lassie.csproj succeeds — 79287e6
 
 #### Manual
 
-- [x] 2.2 App bar renders identically across all authenticated pages
-- [x] 2.3 User email and logout appear once, not duplicated
-- [x] 2.4 Dark/light toggle switches the whole app's theme live
-- [x] 2.5 App bar usable at 375px viewport width
+- [x] 2.2 App bar renders identically across all authenticated pages — 79287e6
+- [x] 2.3 User email and logout appear once, not duplicated — 79287e6
+- [x] 2.4 Dark/light toggle switches the whole app's theme live — 79287e6
+- [x] 2.5 App bar usable at 375px viewport width — 79287e6
 
 ### Phase 3: License List
 
 #### Automated
 
-- [ ] 3.1 dotnet build src/lassie.csproj succeeds
+- [x] 3.1 dotnet build src/lassie.csproj succeeds
 
 #### Manual
 
-- [ ] 3.2 License list shows colored status chips
-- [ ] 3.3 Empty state looks intentional
-- [ ] 3.4 Edit action still navigates correctly
-- [ ] 3.5 Table usable at 375px viewport width
+- [x] 3.2 License list shows colored status chips
+- [x] 3.3 Empty state looks intentional
+- [x] 3.4 Edit action still navigates correctly
+- [x] 3.5 Table usable at 375px viewport width
 
 ### Phase 4: Create/Edit License Forms
 

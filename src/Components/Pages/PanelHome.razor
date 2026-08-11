@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @layout MainLayout
 @rendermode InteractiveServer
+@using Lassie.Components.Shared
 @using Lassie.Data
 @using Lassie.Data.Licenses
 @using Microsoft.EntityFrameworkCore
@@ -13,34 +14,27 @@
 
 @if (licenses.Count == 0)
 {
-    <p>No licenses yet.</p>
-    <a href="licenses/new">Create a license</a>
+    <MudAlert Severity="Severity.Info" Class="mb-4">No licenses yet.</MudAlert>
+    <MudButton Href="licenses/new" Variant="Variant.Filled" Color="Color.Primary">Create a license</MudButton>
 }
 else
 {
-    <figure style="overflow-x: auto">
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col">Label</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Expires</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var license in licenses)
-                {
-                    <tr>
-                        <td>@license.Label</td>
-                        <td>@license.Status</td>
-                        <td>@(license.ExpiresOn is not null ? license.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")</td>
-                        <td><a href="licenses/@license.Id/edit">Edit</a></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </figure>
+    <MudTable Items="licenses" Hover="true">
+        <HeaderContent>
+            <MudTh>Label</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Expires</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Label">@context.Label</MudTd>
+            <MudTd DataLabel="Status"><LicenseStatusBadge Status="context.Status" /></MudTd>
+            <MudTd DataLabel="Expires">@(context.ExpiresOn is not null ? context.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Href="@($"licenses/{context.Id}/edit")" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
 }
 
 @code {
