@@ -10,8 +10,6 @@
 <PageTitle>Lassie</PageTitle>
 
 <h1>Lassie admin panel</h1>
-<p>Logged in as @userEmail</p>
-<a href="logout">Log out</a>
 
 @if (licenses.Count == 0)
 {
@@ -46,17 +44,10 @@ else
 }
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthState { get; set; } = default!;
-
-    private string? userEmail;
     private List<License> licenses = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var state = await AuthState;
-        userEmail = state.User.Identity?.Name;
-
         licenses = await DbContext.Licenses.AsNoTracking().OrderBy(l => l.Label).ToListAsync();
     }
 }

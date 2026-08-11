@@ -509,27 +509,27 @@ None — no data model, schema, or stored data is touched by this change.
 
 #### Automated
 
-- [x] 1.1 dotnet build src/lassie.csproj succeeds
-- [x] 1.2 dotnet list src/lassie.csproj package shows MudBlazor as a direct reference
+- [x] 1.1 dotnet build src/lassie.csproj succeeds — a6737ba
+- [x] 1.2 dotnet list src/lassie.csproj package shows MudBlazor as a direct reference — a6737ba
 
 #### Manual
 
-- [x] 1.3 No MudBlazor-related JS console errors on any page
-- [x] 1.4 MudBlazor CSS/JS load from _content/MudBlazor/..., pico.min.css no longer requested
-- [x] 1.5 Existing pages still render and function
+- [x] 1.3 No MudBlazor-related JS console errors on any page — a6737ba
+- [x] 1.4 MudBlazor CSS/JS load from _content/MudBlazor/..., pico.min.css no longer requested — a6737ba
+- [x] 1.5 Existing pages still render and function — a6737ba
 
 ### Phase 2: Navigation & Layout
 
 #### Automated
 
-- [ ] 2.1 dotnet build src/lassie.csproj succeeds
+- [x] 2.1 dotnet build src/lassie.csproj succeeds
 
 #### Manual
 
-- [ ] 2.2 App bar renders identically across all authenticated pages
-- [ ] 2.3 User email and logout appear once, not duplicated
-- [ ] 2.4 Dark/light toggle switches the whole app's theme live
-- [ ] 2.5 App bar usable at 375px viewport width
+- [x] 2.2 App bar renders identically across all authenticated pages
+- [x] 2.3 User email and logout appear once, not duplicated
+- [x] 2.4 Dark/light toggle switches the whole app's theme live
+- [x] 2.5 App bar usable at 375px viewport width
 
 ### Phase 3: License List
 
