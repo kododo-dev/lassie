@@ -1,8 +1,16 @@
 @inherits LayoutComponentBase
 
+<MudThemeProvider Theme="_theme" @bind-IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+
 <nav>
     <a href="">Home</a>
     <a href="licenses/new">New License</a>
 </nav>
 
 @Body
+
+@code {
+    private bool _isDarkMode;
+    private static readonly MudTheme _theme = new();
+}

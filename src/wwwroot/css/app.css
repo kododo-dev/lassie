@@ -1,0 +1,3 @@
+/* Hand-authored overrides on top of MudBlazor's theme. Populated in Phase 5 with
+   auth-page/auth-card styles for the login screen, which cannot use MudBlazor
+   components (see plan.md's Critical Implementation Details). */
