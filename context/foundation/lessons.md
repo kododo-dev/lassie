@@ -21,3 +21,13 @@
 **Rule**: Before any deploy topology change (more traffic, more frequent deploys, multiple admins), persist Data Protection keys outside the container — e.g. `AddDataProtection().PersistKeysToFileSystem(...)` pointed at a mounted volume, or `PersistKeysToDbContext<LassieDbContext>()` since EF Core is already wired up. Not fixed yet — accepted as low-impact for now (single admin, infrequent deploys, worst case is a re-login).
 
 **Applies to**: Any future work touching deploy frequency, session/token lifetime guarantees, or scaling to multiple app replicas.
+
+## MudBlazor providers must live in the same render scope as per-page @rendermode consumers
+
+**Context**: src/Components/Shared/MudProviders.razor, src/Components/ThemeState.cs (admin-panel-ui-refresh, Phase 5, commit e0cf71b)
+
+**Problem**: A single `<MudThemeProvider>`/`<MudPopoverProvider>` pair placed once in `MainLayout.razor` works fine when every page shares one global interactive render mode, but fails at runtime ("Missing <MudPopoverProvider />") when pages use per-page `@rendermode` instead — which this app requires because `Login.razor` must stay static SSR (`HttpContext.SignInAsync` needs direct response access unavailable inside an interactive circuit). MudBlazor's providers must render in the same render-mode boundary as the components that consume them (e.g. `MudDatePicker`'s calendar popover), and a shared `MainLayout` instance doesn't satisfy that under per-page rendering.
+
+**Rule**: (TBD — fill in the actionable rule)
+
+**Applies to**: (TBD — fill in which future work this constrains)

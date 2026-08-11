@@ -201,6 +201,17 @@ plus an `@code` block holding `private bool _isDarkMode;` and
 assigned). `MudDialogProvider`/`MudSnackbarProvider` are intentionally omitted — nothing
 in this plan uses dialogs or snackbars.
 
+> **Superseded in Phase 5** (commit `e0cf71b`): a single provider pair in `MainLayout`
+> turned out not to work — MudBlazor requires its providers in the same render scope as
+> the components that consume them, which doesn't hold under this app's per-page
+> `@rendermode` (required so `Login.razor` can stay static SSR). The providers and
+> `_isDarkMode`/`_theme` fields were moved out of `MainLayout` into a new shared
+> `src/Components/Shared/MudProviders.razor` component (added to each interactive page
+> individually), backed by a new scoped `src/Components/ThemeState.cs` service so the
+> dark/light toggle still applies app-wide. See
+> `context/foundation/lessons.md` ("MudBlazor providers must live in the same render
+> scope as per-page @rendermode consumers").
+
 #### 7. Imports
 
 **File**: `src/Components/_Imports.razor`
@@ -253,6 +264,11 @@ Wrap `@Body` in a `MudContainer` for consistent page margins/max-width. Getting 
 user's email requires the same `[CascadingParameter] Task<AuthenticationState> AuthState`
 + `OnInitializedAsync` pattern `PanelHome.razor` already uses (see change 2) — move it
 here.
+
+> **Note**: the toggle button described here still lives in `MainLayout` and still
+> works exactly as described — only *where the dark-mode state itself lives* changed in
+> Phase 5, from a local `_isDarkMode` field to the shared `ThemeState.IsDarkMode`
+> service property. See the Phase 1 superseded-note above.
 
 #### 2. Remove duplicated user-info UI
 
