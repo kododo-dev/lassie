@@ -2,19 +2,10 @@
 # Implementation Review: License Deactivate/Reactivate Implementation Plan
 
 - **Plan**: context/changes/license-deactivate-reactivate/plan.md
-- **Scope**: Phase 1 of 2
+- **Scope**: Phase 1 of 2, Phase 2 of 2 (full plan)
 - **Date**: 2026-08-12
 - **Verdict**: APPROVED
-- **Findings**: 0 critical, 0 warnings, 0 observations
-
-## Scope note
-
-Phase 2 excluded from this review — per the Progress-based scoping rule, only phases with every
-Progress checkbox `[x]` qualify. Phase 1 is fully `[x]` with commit `c83e830`. Phase 2's automated
-check (2.1) passed but all 10 manual items (2.2-2.11) are still `[ ]`, pending human confirmation
-from the prior `/10x-implement` turn, and its code changes (`EditLicense.razor`,
-`LicenseStatusBadge.razor`, `MudProviders.razor`) are uncommitted. Re-run this review once Phase 2
-lands.
+- **Findings**: 0 critical, 1 warning, 1 observation
 
 ## Verdicts
 
@@ -22,51 +13,79 @@ lands.
 |-----------|---------|
 | Plan Adherence | PASS |
 | Scope Discipline | PASS |
-| Safety & Quality | PASS |
+| Safety & Quality | WARNING |
 | Architecture | PASS |
 | Pattern Consistency | PASS |
 | Success Criteria | PASS |
 
 ## Evidence
 
-**Plan drift detection (sub-agent 1)**: full MATCH across all three changed files.
-- `src/Data/Licenses/License.cs` — `LicenseStatus` enum gains `Deactivated`; `IsActive` bool
-  (default `true`, not `[NotAudited]`); `Status` precedence logic (`Deactivated` > `Expired` >
-  `Active`) — exact textual match to the plan's contract.
-- `src/Migrations/20260812200540_AddLicenseIsActive.cs` — `AddColumn<bool>("IsActive", "Licenses",
-  nullable: false, defaultValue: true)` in `Up`; `DropColumn` in `Down`. `defaultValue: true`
-  confirmed present in the **committed** file (the manual correction over EF's scaffolder default
-  of `false` actually landed, not just described in the plan).
-- `LassieDbContextModelSnapshot.cs` — in sync with the migration Designer.cs, no drift.
-- No unexpected (EXTRA) files in commit `c83e830` beyond the plan's file list + the change folder.
+**Phase 1** (commit `c83e830`): re-confirmed clean — unchanged since the prior Phase-1-only review
+(`License.cs`, migration files untouched by commits `e60708c`/`d2b7f69`). `dotnet build` and
+`dotnet ef database update` re-run independently, both pass.
 
-**Safety, quality & pattern review (sub-agent 2)**: no CRITICAL or WARNING findings.
-- Migration default value correct (`true`, not the dangerous `false`).
-- `Down()` migration present and correctly reversible.
-- `Status` precedence logic correct; before-state diff confirms a clean superset with no altered
-  Active/Expired branch logic.
-- `IsActive` confirmed NOT `[NotAudited]` — will appear in `AuditLog.Snapshot` as intended.
-- Migration shape matches the prior `20260807203601_AddLicenses.cs` convention (naming, `#nullable
-  disable`, `MigrationBuilder` usage).
-- No SQL injection risk, no hardcoded secrets, no leftover debug code.
-- `Program.cs` verify endpoint (`license.Status == LicenseStatus.Active`, line 158) confirmed
-  unchanged, correctly and implicitly deactivation-aware.
-- No other bool/enum-computed-property pattern exists elsewhere in `src/Data/` to cross-check
-  against — comparison limited to migration shape and audit-attribute convention, both hold.
+**Phase 2** (commit `e60708c`) — plan drift detection (sub-agent 1): full MATCH across all three
+changed files (`MudProviders.razor`'s `MudDialogProvider`, `LicenseStatusBadge.razor`'s
+`Deactivated => Color.Error`, `EditLicense.razor`'s switch/dialog/save-path wiring). The
+mid-implementation `switchRenderKey` bug fix (undocumented in the original plan text, discovered
+during manual browser testing) was independently verified: field present, `@key` correctly applied
+to the `MudSwitch`, increment unconditional and first-statement in the handler — confirmed
+reasonable and correctly wired, not a plan-adherence failure. No EXTRA files beyond the plan's file
+list + the change-folder docs. `CreateLicense.razor` confirmed untouched and correctly needs no
+`IsActive` field (relies on the entity's `= true` property initializer).
 
-**Automated verification (re-run independently)**:
-- `dotnet build src/lassie.csproj` — succeeds (0 errors, pre-existing warnings only).
-- `dotnet ef database update --project src/lassie.csproj` — "No migrations were applied. The
-  database is already up to date." (confirms the migration from commit `c83e830` is correctly
-  applied and stable).
+**Phase 2 — safety, quality & pattern review (sub-agent 2)**: 1 WARNING (see F1), 1 OBSERVATION
+(see F2). Positive checks: `license.IsActive = Model.IsActive;` mutates the same query-loaded
+tracked entity as the pre-existing `Label`/`ExpiresOn` lines (satisfies the "load-before-mutate"
+audit rule); `IDialogService` injection follows the existing `@inject` convention;
+`MudDialogProvider` correctly added to the per-page `MudProviders.razor`, not a shared layout
+(satisfies the render-scope lesson); no `Color.Error` collision elsewhere in `src/Components/`; no
+SQL injection, no hardcoded secrets, no resource leaks.
 
-**Manual verification**: all 3 items (1.4-1.6) checked `[x]` with SHA `c83e830`. Not rubber-stamped
-— these were driven live via `curl` against a running `dotnet run` instance during the original
-`/10x-implement` session (flip `IsActive` false/true directly in DB, confirm
-`/api/license/verify` response flips `valid` accordingly), with results visible in that session's
-transcript.
+**Automated verification (re-run independently)**: `dotnet build src/lassie.csproj` — succeeds (0
+errors).
+
+**Manual verification**: all items across both phases checked `[x]` with SHAs (`c83e830` for
+Phase 1, `e60708c` for Phase 2). Not rubber-stamped — Phase 2's manual checks were driven live via
+Chrome browser automation during the `/10x-implement` session (dialog confirm/cancel flow, DB
+persistence timing, badge precedence, AuditLog snapshot correctness), with two real findings
+surfacing from that live testing: the `switchRenderKey` visual-stuck-off bug (found and fixed in
+the same session) and the mobile-viewport/verify-API-with-real-key checks that couldn't be
+self-verified (browser tool's `resize_window` didn't take effect; the credential-safety guard
+correctly blocked extracting a real API key from the DOM) — both explicitly flagged to the user at
+the time, who then confirmed manual testing complete.
 
 ## Findings
 
-None. Implementation is a clean, exact match to the plan with no drift, no scope creep, no safety
-issues, and no pattern deviations.
+### F1 — Stale-closure race: confirmed toggle can apply to the wrong license
+
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: src/Components/Pages/EditLicense.razor:114-133
+- **Detail**: `HandleIsActiveChanged` reads `license!.Label` synchronously, then `await`s
+  `ShowMessageBoxAsync`. This component instance is reused across navigations between two
+  `/licenses/{Id}/edit` URLs (per the file's own comment at lines 68-71) — `OnParametersSetAsync`
+  reassigns `license` and replaces `Model` with a fresh `EditLicenseFormModel` when the Id changes.
+  If an admin navigates to a *different* license's edit page while the confirmation dialog is still
+  open, the `await` resumes after that reassignment and `Model.IsActive = newValue;` (line 132)
+  silently writes the confirmed value into the *new* license's form model — a decision made for
+  license A gets applied to license B once Save is pressed. No guard re-checks that `license`/its
+  `Id` is unchanged before committing.
+- **Fix**: Capture the license `Id` when `HandleIsActiveChanged` starts, and compare it against the
+  current `license?.Id` right before `Model.IsActive = newValue;` — no-op if they differ.
+- **Decision**: FIXED — guard added, `dotnet build` re-confirmed passing.
+
+### F2 — Switch isn't structurally disabled while the confirmation dialog is open
+
+- **Severity**: ℹ️ OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: src/Components/Pages/EditLicense.razor:38, 114-133
+- **Detail**: Nothing disables the `MudSwitch` for the duration of the `await
+  ShowMessageBoxAsync(...)` call. MudBlazor's dialog overlay is modal, so this is low risk in
+  practice — noted alongside F1 since both concern the same await window, but doesn't
+  independently cause F1 (navigating away isn't gated by the switch).
+- **Fix**: No action needed unless F1's fix is skipped — the modal overlay already prevents
+  re-entrant clicks on the switch itself.
+- **Decision**: SKIPPED — F1's fix already covers the real risk.

@@ -114,6 +114,7 @@ else
     private async Task HandleIsActiveChanged(bool newValue)
     {
         switchRenderKey++;
+        var licenseId = license!.Id;
 
         if (!newValue)
         {
@@ -127,6 +128,16 @@ else
             {
                 return;
             }
+        }
+
+        // Blazor Server reuses this component instance across navigations between two
+        // /licenses/{Id}/edit URLs (see OnParametersSetAsync) — if the admin navigates to a
+        // different license while the confirmation dialog above is still open, license/Model
+        // get reassigned before this resumes. Guard against applying a decision confirmed for
+        // one license onto whatever license happens to be loaded by the time we get here.
+        if (license?.Id != licenseId)
+        {
+            return;
         }
 
         Model.IsActive = newValue;
