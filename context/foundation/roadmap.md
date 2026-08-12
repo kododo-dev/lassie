@@ -3,7 +3,7 @@ project: Lassie
 version: 1
 status: draft
 created: 2026-08-04
-updated: 2026-08-11
+updated: 2026-08-12
 prd_version: 1
 main_goal: quality
 top_blocker: capacity
@@ -38,7 +38,7 @@ A company that ships its own product to many customer deployments has no central
 | S-01 | `module-catalog-management`         | *(parked, nice-to-have post-MVP)* Admin can define license fields (name + data type) and their options | F-01, F-02     | FR-004                             | parked |
 | S-02 | `license-creation-and-verification` | Admin creates a license (name + optional expiry) + API key; client app verifies it via the API | F-01, F-02 | FR-005, FR-008, FR-009, FR-010, US-01 | done |
 | S-03 | `license-edit-with-audit-history`   | Admin edits a license, with prior versions retained for audit                          | S-02, F-01, F-02 | FR-006                             | done |
-| S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | proposed |
+| S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | done |
 | S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | done |
 | S-06 | `admin-panel-ui-refresh`            | Admin uses a panel that's visually polished and pleasant, not just functional — every screen shipped so far (login, list, create/edit, audit history) | F-02, S-02, S-03, S-05 | NFR (panel usability/readability) | done |
 
@@ -147,7 +147,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Independent of S-03/S-05 — a status-flag toggle on an entity that already exists after S-02. Low risk; no shared state with the other two parallel branches.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: License list view
 
@@ -219,3 +219,4 @@ Lifted from PRD `## Non-Goals` — MVP scope was already deliberately trimmed du
 - **S-03: Admin edits a license's name or expiry date, and every prior version remains available for audit — no destructive overwrite.** — Archived 2026-08-10 → `context/archive/2026-08-08-license-edit-with-audit-history/`. Lesson: —.
 - **S-05: Admin views the list of licenses and each one's current status.** — Archived 2026-08-10 → `context/archive/2026-08-10-license-list-view/`. Lesson: —.
 - **S-06: The admin panel looks and feels intentional — clean layout, consistent spacing/typography, clear visual hierarchy — instead of the current bare-bones styling. Covers every screen shipped so far: login (F-02), license create/edit (S-02/S-03), audit history (S-03), and the license list (S-05). Deactivate/reactivate (S-04) picks up the same design once it ships, whether S-06 lands before or after it.** — Archived 2026-08-11 → `context/archive/2026-08-11-admin-panel-ui-refresh/`. Lesson: MudBlazor providers must live in the same render scope as per-page @rendermode consumers (see `context/foundation/lessons.md`).
+- **S-04: Admin deactivates a license and can later reactivate it — deactivation is a reversible state, not permanent.** — Archived 2026-08-12 → `context/archive/2026-08-12-license-deactivate-reactivate/`. Lesson: —.
