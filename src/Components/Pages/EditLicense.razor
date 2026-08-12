@@ -8,6 +8,7 @@
 @using Lassie.Data.Licenses
 @using Microsoft.EntityFrameworkCore
 @inject LassieDbContext DbContext
+@inject IDialogService DialogService
 
 <PageTitle>Edit License — Lassie</PageTitle>
 
@@ -34,6 +35,7 @@ else
         }
         <MudTextField @bind-Value="Model.Label" Label="Label" Class="mb-4" />
         <MudDatePicker @bind-Date="ExpiresOnDateTime" Label="Expires on (optional)" Class="mb-4" />
+        <MudSwitch @key="switchRenderKey" T="bool" Value="Model.IsActive" ValueChanged="HandleIsActiveChanged" Label="@(Model.IsActive ? "Active" : "Inactive")" Color="Color.Success" Class="mb-4" />
         <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
         <MudButton Href="/" Variant="Variant.Text">Cancel</MudButton>
     </EditForm>
@@ -89,9 +91,45 @@ else
             Model = new EditLicenseFormModel
             {
                 Label = license.Label,
-                ExpiresOn = license.ExpiresOn
+                ExpiresOn = license.ExpiresOn,
+                IsActive = license.IsActive
             };
         }
+    }
+
+    // Explicit Value/ValueChanged (not @bind-Value) so switching to Inactive can be
+    // intercepted with a confirmation dialog before the pending value is accepted into
+    // Model — canceling leaves the switch on "Active" and Model untouched. Switching to
+    // Active needs no confirmation (purely restorative). Either direction is only
+    // persisted when HandleSaveAsync runs, alongside Label/ExpiresOn.
+    //
+    // MudSwitch updates its own visual thumb position optimistically on click, before
+    // ValueChanged returns — if the handler declines the change (Cancel), Model.IsActive
+    // never changes, so Blazor sees an unchanged Value parameter and skips re-rendering
+    // the switch, leaving it visually stuck "off" while the label still says "Active".
+    // Bumping switchRenderKey on every invocation forces MudSwitch to remount and read
+    // its Value fresh from Model.IsActive, so a declined toggle snaps back correctly.
+    private int switchRenderKey;
+
+    private async Task HandleIsActiveChanged(bool newValue)
+    {
+        switchRenderKey++;
+
+        if (!newValue)
+        {
+            var result = await DialogService.ShowMessageBoxAsync(
+                "Deactivate license?",
+                $"Client apps using \"{license!.Label}\"'s API key will immediately stop verifying as valid once you save.",
+                yesText: "Deactivate",
+                cancelText: "Cancel");
+
+            if (result != true)
+            {
+                return;
+            }
+        }
+
+        Model.IsActive = newValue;
     }
 
     private async Task HandleSaveAsync()
@@ -103,6 +141,7 @@ else
 
         license.Label = Model.Label;
         license.ExpiresOn = Model.ExpiresOn;
+        license.IsActive = Model.IsActive;
 
         try
         {
@@ -131,5 +170,7 @@ else
         public string Label { get; set; } = "";
 
         public DateOnly? ExpiresOn { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 }

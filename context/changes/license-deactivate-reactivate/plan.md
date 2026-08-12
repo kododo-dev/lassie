@@ -207,31 +207,31 @@ The `AddColumn` migration must specify `defaultValue: true` so existing producti
 
 #### Automated
 
-- [x] 1.1 `dotnet build src/lassie.csproj` succeeds
-- [x] 1.2 `dotnet ef migrations add AddLicenseIsActive --project src/lassie.csproj` generates a migration with no manual edits needed to compile
-- [x] 1.3 `dotnet ef database update --project src/lassie.csproj` applies cleanly against the dev database
+- [x] 1.1 `dotnet build src/lassie.csproj` succeeds — c83e830
+- [x] 1.2 `dotnet ef migrations add AddLicenseIsActive --project src/lassie.csproj` generates a migration with no manual edits needed to compile — c83e830
+- [x] 1.3 `dotnet ef database update --project src/lassie.csproj` applies cleanly against the dev database — c83e830
 
 #### Manual
 
-- [x] 1.4 Existing licenses show `IsActive = true` after migration
-- [x] 1.5 Manually flipping `IsActive` to false makes `/api/license/verify` return `valid: false`
-- [x] 1.6 Flipping it back to true restores `valid: true`
+- [x] 1.4 Existing licenses show `IsActive = true` after migration — c83e830
+- [x] 1.5 Manually flipping `IsActive` to false makes `/api/license/verify` return `valid: false` — c83e830
+- [x] 1.6 Flipping it back to true restores `valid: true` — c83e830
 
 ### Phase 2: Edit page switch & badge
 
 #### Automated
 
-- [ ] 2.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
 
 #### Manual
 
-- [ ] 2.2 Toggling the switch off opens a confirmation dialog naming the license before committing
-- [ ] 2.3 Canceling the dialog leaves the switch on "Active" and the DB untouched
-- [ ] 2.4 Confirming the dialog flips the switch to "Inactive" without persisting until Save
-- [ ] 2.5 Clicking Save with the switch "Inactive" persists `IsActive = false` in one save; badge shows "Deactivated"
-- [ ] 2.6 Toggling back to "Active" needs no dialog; Save persists `IsActive = true` again
-- [ ] 2.7 Editing Label + toggling the switch in one visit, then one Save, persists both and produces a single AuditLog row
-- [ ] 2.8 Deactivated + expired license shows "Deactivated" badge (precedence)
-- [ ] 2.9 AuditLog shows correct before/after snapshots for a deactivate-then-reactivate round trip (two Saves)
-- [ ] 2.10 End-to-end UI-driven deactivate/reactivate round trip confirmed via `/api/license/verify`
-- [ ] 2.11 Edit page with new switch remains usable at phone-width viewport
+- [x] 2.2 Toggling the switch off opens a confirmation dialog naming the license before committing
+- [x] 2.3 Canceling the dialog leaves the switch on "Active" and the DB untouched
+- [x] 2.4 Confirming the dialog flips the switch to "Inactive" without persisting until Save
+- [x] 2.5 Clicking Save with the switch "Inactive" persists `IsActive = false` in one save; badge shows "Deactivated"
+- [x] 2.6 Toggling back to "Active" needs no dialog; Save persists `IsActive = true` again
+- [x] 2.7 Editing Label + toggling the switch in one visit, then one Save, persists both and produces a single AuditLog row
+- [x] 2.8 Deactivated + expired license shows "Deactivated" badge (precedence)
+- [x] 2.9 AuditLog shows correct before/after snapshots for a deactivate-then-reactivate round trip (two Saves)
+- [x] 2.10 End-to-end UI-driven deactivate/reactivate round trip confirmed via `/api/license/verify`
+- [x] 2.11 Edit page with new switch remains usable at phone-width viewport
