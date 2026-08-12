@@ -221,17 +221,17 @@ The `AddColumn` migration must specify `defaultValue: true` so existing producti
 
 #### Automated
 
-- [x] 2.1 `dotnet build src/lassie.csproj` succeeds
+- [x] 2.1 `dotnet build src/lassie.csproj` succeeds — e60708c
 
 #### Manual
 
-- [x] 2.2 Toggling the switch off opens a confirmation dialog naming the license before committing
-- [x] 2.3 Canceling the dialog leaves the switch on "Active" and the DB untouched
-- [x] 2.4 Confirming the dialog flips the switch to "Inactive" without persisting until Save
-- [x] 2.5 Clicking Save with the switch "Inactive" persists `IsActive = false` in one save; badge shows "Deactivated"
-- [x] 2.6 Toggling back to "Active" needs no dialog; Save persists `IsActive = true` again
-- [x] 2.7 Editing Label + toggling the switch in one visit, then one Save, persists both and produces a single AuditLog row
-- [x] 2.8 Deactivated + expired license shows "Deactivated" badge (precedence)
-- [x] 2.9 AuditLog shows correct before/after snapshots for a deactivate-then-reactivate round trip (two Saves)
-- [x] 2.10 End-to-end UI-driven deactivate/reactivate round trip confirmed via `/api/license/verify`
-- [x] 2.11 Edit page with new switch remains usable at phone-width viewport
+- [x] 2.2 Toggling the switch off opens a confirmation dialog naming the license before committing — e60708c
+- [x] 2.3 Canceling the dialog leaves the switch on "Active" and the DB untouched — e60708c
+- [x] 2.4 Confirming the dialog flips the switch to "Inactive" without persisting until Save — e60708c
+- [x] 2.5 Clicking Save with the switch "Inactive" persists `IsActive = false` in one save; badge shows "Deactivated" — e60708c
+- [x] 2.6 Toggling back to "Active" needs no dialog; Save persists `IsActive = true` again — e60708c
+- [x] 2.7 Editing Label + toggling the switch in one visit, then one Save, persists both and produces a single AuditLog row — e60708c
+- [x] 2.8 Deactivated + expired license shows "Deactivated" badge (precedence) — e60708c
+- [x] 2.9 AuditLog shows correct before/after snapshots for a deactivate-then-reactivate round trip (two Saves) — e60708c
+- [x] 2.10 End-to-end UI-driven deactivate/reactivate round trip confirmed via `/api/license/verify` — e60708c
+- [x] 2.11 Edit page with new switch remains usable at phone-width viewport — e60708c
