@@ -93,6 +93,22 @@ No new provider placement is needed — just confirm (Phase 1 manual verificatio
 opens correctly on every page that uses `MainLayout`, including `PanelHome` and `EditLicense`,
 since each supplies its own `<MudProviders />` independently.
 
+> **Addendum (post-implementation, 2026-08-17)**: the assumption above was wrong. `MainLayout`
+> is static (no `@rendermode`) under this app's per-page-interactivity setup, so a `MudMenu`
+> placed directly in it never receives click events at all — it needs its own interactive
+> island. Once given that island, MudBlazor's popover provider still isn't reachable across the
+> boundary between the layout's island and each page's own interactive root (confirmed
+> empirically: both "Missing `<MudPopoverProvider />`" and duplicate-subscriber errors were
+> observed, depending on which side hosted the provider). The actual fix, delivered in commit
+> `4f50cd9`, is a new component `src/Components/Layout/AppBarActions.razor` carrying its own
+> `@rendermode` and a hand-rolled toggle dropdown (`MudIconButton` + click-outside overlay +
+> `MudPaper`) instead of `MudMenu`/`MudMenuItem`. The end-user contract (menu with one "Log out"
+> item, opens on every `MainLayout` page) is unchanged and manually verified working — only the
+> internal mechanism differs from what this section originally specified. This is a distinct
+> variant of the MudBlazor provider render-scope constraint in `context/foundation/lessons.md`
+> (that lesson covers same-provider/different-rendermode; this one covers cross-island
+> unreachability) and is worth folding into that lesson for future MudBlazor layout work.
+
 ## Phase 1: App Bar Rework
 
 ### Overview
@@ -257,27 +273,27 @@ None — no data model or persisted-schema changes.
 
 #### Automated
 
-- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 1.1 Build succeeds: `dotnet build src/lassie.csproj` — 4f50cd9
 
 #### Manual
 
-- [x] 1.2 Brand link navigates home from every panel page, relative path preserves `PathBase`
-- [x] 1.3 App bar no longer shows "New License" button or user email
-- [x] 1.4 Account menu opens with one "Log out" item; logout works
-- [x] 1.5 Menu opens correctly on every page using `MainLayout`
+- [x] 1.2 Brand link navigates home from every panel page, relative path preserves `PathBase` — 4f50cd9
+- [x] 1.3 App bar no longer shows "New License" button or user email — 4f50cd9
+- [x] 1.4 Account menu opens with one "Log out" item; logout works — 4f50cd9
+- [x] 1.5 Menu opens correctly on every page using `MainLayout` — 4f50cd9
 
 ### Phase 2: License List Grid Upgrade
 
 #### Automated
 
-- [ ] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
+- [x] 2.1 Build succeeds: `dotnet build src/lassie.csproj`
 
 #### Manual
 
-- [ ] 2.2 Grid displays all licenses with same data as before
-- [ ] 2.3 Column sorting works; Status and Expires special-case ordering verified
-- [ ] 2.4 Per-column filtering works and clears correctly
-- [ ] 2.5 "New License" toolbar button present in both empty/populated states; empty-state's own
+- [x] 2.2 Grid displays all licenses with same data as before
+- [x] 2.3 Column sorting works; Status and Expires special-case ordering verified
+- [x] 2.4 Per-column filtering works and clears correctly
+- [x] 2.5 "New License" toolbar button present in both empty/populated states; empty-state's own
   button removed
-- [ ] 2.6 Edit icon button still navigates correctly
-- [ ] 2.7 Narrow-viewport layout: toolbar stacks, grid scrolls horizontally, no lost functionality
+- [x] 2.6 Edit icon button still navigates correctly
+- [x] 2.7 Narrow-viewport layout: toolbar stacks, grid scrolls horizontally, no lost functionality

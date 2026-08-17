@@ -14,36 +14,71 @@
 
 <h1>Lassie admin panel</h1>
 
+<div class="d-flex flex-wrap justify-end mb-4">
+    <MudButton Href="licenses/new" Variant="Variant.Filled" Color="Color.Primary">New License</MudButton>
+</div>
+
 @if (licenses.Count == 0)
 {
-    <MudAlert Severity="Severity.Info" Class="mb-4">No licenses yet.</MudAlert>
-    <MudButton Href="licenses/new" Variant="Variant.Filled" Color="Color.Primary">Create a license</MudButton>
+    <MudAlert Severity="Severity.Info">No licenses yet.</MudAlert>
 }
 else
 {
-    <MudTable Items="licenses" Hover="true">
-        <HeaderContent>
-            <MudTh>Label</MudTh>
-            <MudTh>Status</MudTh>
-            <MudTh>Expires</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Label">@context.Label</MudTd>
-            <MudTd DataLabel="Status"><LicenseStatusBadge Status="context.Status" /></MudTd>
-            <MudTd DataLabel="Expires">@(context.ExpiresOn is not null ? context.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Href="@($"licenses/{context.Id}/edit")" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
+    <div style="overflow-x: auto;">
+        <MudDataGrid @ref="_dataGrid" T="License" Items="licenses" Hover="true" Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow">
+            <Columns>
+                <PropertyColumn Property="x => x.Label" Title="Label" />
+                <PropertyColumn T="License" TProperty="LicenseStatus" Property="x => x.Status" Title="Status" SortBy="SortStatusBy">
+                    <CellTemplate>
+                        <LicenseStatusBadge Status="context.Item.Status" />
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn T="License" TProperty="DateOnly?" Property="x => x.ExpiresOn" Title="Expires" SortBy="SortExpiresBy">
+                    <CellTemplate>
+                        @(context.Item.ExpiresOn is not null ? context.Item.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")
+                    </CellTemplate>
+                </PropertyColumn>
+                <TemplateColumn Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Href="@($"licenses/{context.Item.Id}/edit")" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </div>
 }
 
 @code {
+    private MudDataGrid<License> _dataGrid = null!;
     private List<License> licenses = new();
 
     protected override async Task OnInitializedAsync()
     {
         licenses = await DbContext.Licenses.AsNoTracking().OrderBy(l => l.Label).ToListAsync();
+    }
+
+    // Priority order (not alphabetical/enum declaration order) — an admin sorting by
+    // status wants active licenses grouped first, not "Active, Deactivated, Expired".
+    private static object SortStatusBy(License license) => license.Status switch
+    {
+        LicenseStatus.Active => 0,
+        LicenseStatus.Expired => 1,
+        LicenseStatus.Deactivated => 2,
+        _ => 3
+    };
+
+    // MudDataGrid sorts ascending/descending via LINQ OrderBy/OrderByDescending, which
+    // flips comparer polarity per direction — a static "null = extreme" sentinel would
+    // put no-expiry licenses first on one direction and last on the other. Reading the
+    // column's *current* direction here and flipping the sentinel to match cancels that
+    // out, keeping no-expiry licenses last in both directions.
+    private object SortExpiresBy(License license)
+    {
+        var descending = _dataGrid?.SortDefinitions.TryGetValue(nameof(License.ExpiresOn), out var def) == true && def.Descending;
+        if (license.ExpiresOn is null)
+        {
+            return descending ? DateTime.MinValue : DateTime.MaxValue;
+        }
+        return license.ExpiresOn.Value.ToDateTime(TimeOnly.MinValue);
     }
 }
