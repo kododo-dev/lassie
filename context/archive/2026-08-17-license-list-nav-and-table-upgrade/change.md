@@ -1,10 +1,10 @@
 ---
 change_id: license-list-nav-and-table-upgrade
 title: Top nav rework and license table upgrade (sorting/filtering)
-status: impl_reviewed
+status: archived
 created: 2026-08-17
 updated: 2026-08-17
-archived_at: null
+archived_at: 2026-08-17T21:27:00Z
 ---
 
 ## Notes
