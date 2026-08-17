@@ -1,0 +1,37 @@
+@* MainLayout is static (no @rendermode) under this app's per-page interactivity setup —
+   any interactive element placed directly in it never receives click events (confirmed
+   against MudBlazor maintainer guidance: https://github.com/MudBlazor/MudBlazor/issues/12277).
+   This component carves out its own interactive island with @rendermode so the dark-mode
+   toggle and user menu actually work.
+
+   The user menu below is a hand-rolled dropdown, not MudMenu: MudBlazor's popover system
+   allows exactly one live MudPopoverProvider subscriber per page, and it isn't reachable
+   across the boundary between this layout-level island and each page's own interactive
+   root (which needs its own provider for MudDatePicker/MudDialog/MudDataGrid filters) —
+   confirmed empirically (both "Missing <MudPopoverProvider />" and duplicate-subscriber
+   crashes depending on which side hosts it). See the MudBlazor provider render-scope
+   lesson in context/foundation/lessons.md. *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject ThemeState ThemeState
+
+<MudIconButton Icon="@(ThemeState.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+               Color="Color.Inherit"
+               OnClick="@(() => ThemeState.IsDarkMode = !ThemeState.IsDarkMode)" />
+
+<div style="position: relative; display: inline-block;">
+    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="ToggleMenu" />
+    @if (_menuOpen)
+    {
+        <div style="position: fixed; inset: 0; z-index: 10;" @onclick="CloseMenu"></div>
+        <MudPaper Class="pa-1" Elevation="4" Style="position: absolute; right: 0; top: 100%; z-index: 11; min-width: 140px;">
+            <MudButton Href="logout" FullWidth="true" Style="justify-content: flex-start; text-transform: none;">Log out</MudButton>
+        </MudPaper>
+    }
+</div>
+
+@code {
+    private bool _menuOpen;
+
+    private void ToggleMenu() => _menuOpen = !_menuOpen;
+    private void CloseMenu() => _menuOpen = false;
+}

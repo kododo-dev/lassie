@@ -1,19 +1,10 @@
 @inherits LayoutComponentBase
-@inject ThemeState ThemeState
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h6">Lassie</MudText>
+        <MudLink Href="" Underline="Underline.None" Color="Color.Inherit" Typo="Typo.h6">Lassie</MudLink>
         <MudSpacer />
-        <MudButton Href="licenses/new" Color="Color.Inherit">New License</MudButton>
-        @if (_userEmail is not null)
-        {
-            <MudText Class="mx-4">@_userEmail</MudText>
-        }
-        <MudIconButton Icon="@(ThemeState.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                       Color="Color.Inherit"
-                       OnClick="@(() => ThemeState.IsDarkMode = !ThemeState.IsDarkMode)" />
-        <MudButton Href="logout" Color="Color.Inherit">Log out</MudButton>
+        <AppBarActions />
     </MudAppBar>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
@@ -21,16 +12,3 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
-@code {
-    private string? _userEmail;
-
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthState { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var state = await AuthState;
-        _userEmail = state.User.Identity?.Name;
-    }
-}
