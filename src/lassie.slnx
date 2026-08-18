@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="lassie.csproj" />
+  <Project Path="Lassie.Tests/Lassie.Tests.csproj" />
+</Solution>

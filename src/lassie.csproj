@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Lassie.Tests is a nested project directory under this one; without these, the
+         SDK's implicit **/*.cs (and content) globs would also pull the test project's
+         files into this project's own compilation. -->
+    <Compile Remove="Lassie.Tests/**" />
+    <Content Remove="Lassie.Tests/**" />
+    <EmbeddedResource Remove="Lassie.Tests/**" />
+    <None Remove="Lassie.Tests/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
