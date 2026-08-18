@@ -129,11 +129,48 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a unit test
 
-- TBD — see §3 Phase 1 (status-precedence table-driven tests, key-secrecy structural tests).
+- **Location**: `src/Lassie.Tests/<Area>/` (e.g. `Licenses/`, `Auditing/`) — a
+  folder per feature area, mirroring `src/Data/<Area>/`.
+- **Naming**: `<Subject>Tests.cs`, one test class per subject under test.
+- **Reference test**: `src/Lassie.Tests/Licenses/LicenseStatusTests.cs` —
+  table-driven (`[Theory]`/`[MemberData]`) coverage with literal expected
+  values sourced from the PRD/a lesson, never re-derived from the
+  implementation's own comparison (the oracle-problem guard). See also
+  `src/Lassie.Tests/Licenses/ApiKeyHasherTests.cs` for plain `[Fact]`-style
+  structural-invariant tests (no DB, no `[Theory]` needed).
+- **Run**: `dotnet test src/Lassie.Tests/Lassie.Tests.csproj --filter <ClassName>`
 
 ### 6.2 Adding an integration test
 
-- TBD — see §3 Phase 1 (audit load-before-mutate) and §3 Phase 2 (verify-endpoint outage/abuse tests).
+- **Location**: same convention as unit tests — `src/Lassie.Tests/<Area>/`.
+- **Pattern**: extend `Lassie.Tests.Infrastructure.IntegrationTestBase` and
+  tag the class `[Collection("Postgres")]`. The base class gives you a
+  `Factory` (`LassieWebApplicationFactory`), an `HttpClient`, and a
+  `DbContext` (`LassieDbContext`) — all bound to one Testcontainers-provisioned
+  Postgres container shared for the whole test run
+  (`Lassie.Tests.Infrastructure.PostgresCollectionFixture`, started once via
+  the `[CollectionDefinition("Postgres")]`). Each test class instance opens
+  its own connection and transaction on `InitializeAsync` and rolls it back
+  on `DisposeAsync`, so tests never see each other's writes — including
+  writes made through `HttpClient` calls that hit the app's own
+  DI-constructed `LassieDbContext` inside a request, which is enlisted into
+  the same test transaction via an `IStartupFilter` middleware (see
+  `LassieWebApplicationFactory.cs` for why: EF Core requires every
+  additional `DbContext` sharing a connection to explicitly call
+  `Database.UseTransactionAsync`, it isn't automatic).
+- **Mocking policy**: never mock `LassieDbContext` or the `ChangeTracker` —
+  always the real Testcontainers Postgres instance. This is the direct
+  enforcement mechanism for the lesson behind Risk #5
+  (`context/foundation/lessons.md`, "Audit snapshots require
+  load-before-mutate") — a mocked `ChangeTracker` can't reproduce
+  `OriginalValues` semantics, so it would let a future load-before-mutate
+  regression pass silently.
+- **Reference test**: `src/Lassie.Tests/Auditing/AuditLoadBeforeMutateTests.cs`
+  (real load-then-mutate-then-assert-snapshot flow) and
+  `src/Lassie.Tests/Licenses/VerifyEndpointKeySecrecyTests.cs` (seeds via
+  `DbContext`, asserts via `HttpClient` — the reference pattern for testing
+  the minimal-API verify endpoint).
+- **Run**: `dotnet test src/Lassie.Tests/Lassie.Tests.csproj --filter <ClassName>`
 
 ### 6.3 Adding a component (Blazor) test
 
@@ -146,6 +183,16 @@ the relevant rollout phase ships; before that, the sub-section reads
 ### 6.5 Per-rollout-phase notes
 
 (Filled in by `/10x-implement` as each phase ships.)
+
+- **Phase 1** (`testing-backend-critical-path-coverage`): the test project
+  was relocated mid-phase, at the user's request, from the plan's original
+  `tests/Lassie.Tests/` to `src/Lassie.Tests/` (sibling of `src/lassie.csproj`),
+  with a new `src/lassie.slnx` solution file referencing both projects.
+  Every path in §6.1/§6.2 above reflects the actual `src/Lassie.Tests/`
+  location. One consequence: `src/lassie.csproj` needed explicit
+  `<Compile Remove="Lassie.Tests/**" />` (+ `Content`/`EmbeddedResource`/`None`)
+  entries, since the test project now sits *inside* the app project's own
+  directory and would otherwise be swept up by its implicit globs.
 
 ## 7. What We Deliberately Don't Test
 

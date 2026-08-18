@@ -488,19 +488,19 @@ production write paths under test (unmodified).
 
 #### Automated
 
-- [x] 3.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter "ApiKeyHasherTests|VerifyEndpointKeySecrecyTests"` passes
+- [x] 3.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter "ApiKeyHasherTests|VerifyEndpointKeySecrecyTests"` passes — 0e1b746
 
 #### Manual
 
-- [x] 3.2 Manually inspect one captured verify-endpoint response body to confirm it's exactly `{"valid":true}`
+- [x] 3.2 Manually inspect one captured verify-endpoint response body to confirm it's exactly `{"valid":true}` — 0e1b746
 
 ### Phase 4: Risk #5 — Audit Load-Before-Mutate + Cookbook Update
 
 #### Automated
 
-- [ ] 4.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj` — full suite passes
-- [ ] 4.2 `context/foundation/test-plan.md` §6.1 and §6.2 no longer read "TBD"
+- [x] 4.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj` — full suite passes
+- [x] 4.2 `context/foundation/test-plan.md` §6.1 and §6.2 no longer read "TBD"
 
 #### Manual
 
-- [ ] 4.3 Read updated §6.1/§6.2 entries and confirm they're sufficient for a future contributor
+- [x] 4.3 Read updated §6.1/§6.2 entries and confirm they're sufficient for a future contributor
