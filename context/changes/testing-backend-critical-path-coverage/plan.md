@@ -478,21 +478,21 @@ production write paths under test (unmodified).
 
 #### Automated
 
-- [x] 2.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter LicenseStatusTests` passes, all rows green
+- [x] 2.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter LicenseStatusTests` passes, all rows green — 0469750
 
 #### Manual
 
-- [x] 2.2 Spot-check one boundary row's expected value against `context/foundation/prd.md` FR-007/FR-010 by hand
+- [x] 2.2 Spot-check one boundary row's expected value against `context/foundation/prd.md` FR-007/FR-010 by hand — 0469750
 
 ### Phase 3: Risk #2 — API Key Secrecy
 
 #### Automated
 
-- [ ] 3.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter "ApiKeyHasherTests|VerifyEndpointKeySecrecyTests"` passes
+- [x] 3.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter "ApiKeyHasherTests|VerifyEndpointKeySecrecyTests"` passes
 
 #### Manual
 
-- [ ] 3.2 Manually inspect one captured verify-endpoint response body to confirm it's exactly `{"valid":true}`
+- [x] 3.2 Manually inspect one captured verify-endpoint response body to confirm it's exactly `{"valid":true}`
 
 ### Phase 4: Risk #5 — Audit Load-Before-Mutate + Cookbook Update
 
