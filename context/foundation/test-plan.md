@@ -158,6 +158,14 @@ the relevant rollout phase ships; before that, the sub-section reads
   `LassieWebApplicationFactory.cs` for why: EF Core requires every
   additional `DbContext` sharing a connection to explicitly call
   `Database.UseTransactionAsync`, it isn't automatic).
+- **Caveat — the seeded admin user is not rolled back**: `IntegrationTestBase`
+  forces host startup (`Migrate()` + the admin-user seed) *before* the
+  per-test transaction begins, so that the app's own migration transactions
+  never nest inside the test's. That means the seed is a real, non-rolled-back
+  commit against the collection-shared container: the first test in a run
+  permanently seeds an admin `User` row that every later test in the same
+  run will also see. Don't assert `Users` is empty in a fresh integration
+  test — it may not be, depending on test execution order.
 - **Mocking policy**: never mock `LassieDbContext` or the `ChangeTracker` —
   always the real Testcontainers Postgres instance. This is the direct
   enforcement mechanism for the lesson behind Risk #5

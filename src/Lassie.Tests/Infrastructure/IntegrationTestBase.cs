@@ -24,6 +24,9 @@ public abstract class IntegrationTestBase(PostgresCollectionFixture fixture) : I
 
         // Forces host startup (Migrate() + admin seed) while the connection is still
         // transaction-free, so the app's own migration transactions never nest inside ours.
+        // Consequence: that seed is a real, non-rolled-back commit against the
+        // collection-shared container — the first test in a run permanently seeds an
+        // admin User row that every later test in the same run will also see.
         HttpClient = Factory.CreateClient();
 
         _transaction = await _connection.BeginTransactionAsync();
@@ -38,10 +41,29 @@ public abstract class IntegrationTestBase(PostgresCollectionFixture fixture) : I
 
     public async Task DisposeAsync()
     {
-        await DbContext.DisposeAsync();
-        await _transaction.RollbackAsync();
-        await _transaction.DisposeAsync();
-        await Factory.DisposeAsync();
-        await _connection.DisposeAsync();
+        // Guarded because InitializeAsync assigns these fields one at a time across
+        // several fallible awaits — a failure partway through would otherwise leave
+        // later fields null and NRE here, masking the real error and skipping cleanup
+        // of whatever was already acquired.
+        if (DbContext is not null)
+        {
+            await DbContext.DisposeAsync();
+        }
+
+        if (_transaction is not null)
+        {
+            await _transaction.RollbackAsync();
+            await _transaction.DisposeAsync();
+        }
+
+        if (Factory is not null)
+        {
+            await Factory.DisposeAsync();
+        }
+
+        if (_connection is not null)
+        {
+            await _connection.DisposeAsync();
+        }
     }
 }
