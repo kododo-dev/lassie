@@ -1,7 +1,7 @@
 ---
 change_id: testing-backend-critical-path-coverage
 title: Backend test bootstrap: status precedence, key secrecy, audit integrity
-status: implementing
+status: implemented
 created: 2026-08-18
 updated: 2026-08-18
 archived_at: null

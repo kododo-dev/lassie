@@ -498,9 +498,9 @@ production write paths under test (unmodified).
 
 #### Automated
 
-- [x] 4.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj` — full suite passes
-- [x] 4.2 `context/foundation/test-plan.md` §6.1 and §6.2 no longer read "TBD"
+- [x] 4.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj` — full suite passes — e708225
+- [x] 4.2 `context/foundation/test-plan.md` §6.1 and §6.2 no longer read "TBD" — e708225
 
 #### Manual
 
-- [x] 4.3 Read updated §6.1/§6.2 entries and confirm they're sufficient for a future contributor
+- [x] 4.3 Read updated §6.1/§6.2 entries and confirm they're sufficient for a future contributor — e708225
