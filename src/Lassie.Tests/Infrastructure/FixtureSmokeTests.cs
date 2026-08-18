@@ -5,6 +5,7 @@ using Xunit;
 namespace Lassie.Tests.Infrastructure;
 
 [Collection("Postgres")]
+[Trait("Category", "Integration")]
 public class FixtureSmokeTests(PostgresCollectionFixture fixture) : IntegrationTestBase(fixture)
 {
     [Fact]

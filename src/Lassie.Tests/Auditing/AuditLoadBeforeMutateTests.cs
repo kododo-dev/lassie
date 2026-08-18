@@ -8,6 +8,7 @@ using Xunit;
 namespace Lassie.Tests.Auditing;
 
 [Collection("Postgres")]
+[Trait("Category", "Integration")]
 public class AuditLoadBeforeMutateTests(PostgresCollectionFixture fixture) : IntegrationTestBase(fixture)
 {
     [Fact]

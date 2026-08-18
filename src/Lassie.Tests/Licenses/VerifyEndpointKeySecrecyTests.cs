@@ -6,6 +6,7 @@ using Xunit;
 namespace Lassie.Tests.Licenses;
 
 [Collection("Postgres")]
+[Trait("Category", "Integration")]
 public class VerifyEndpointKeySecrecyTests(PostgresCollectionFixture fixture) : IntegrationTestBase(fixture)
 {
     [Fact]

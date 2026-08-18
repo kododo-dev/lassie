@@ -28,6 +28,8 @@ dotnet list src/lassie.csproj package --vulnerable --include-transitive  # depen
 
 No test project exists yet. `src/lassie.http` has example requests for use with an HTTP client (VS Code REST Client, Rider, etc.).
 
+One-time setup per clone: run `git config core.hooksPath .githooks` to enable the versioned pre-commit hook (`.githooks/pre-commit.js`) that checks `dotnet format` on staged `.cs` files and runs the fast unit-test subset (`--filter "Category!=Integration"`).
+
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
 ## 10xDevs AI Toolkit - Module 3, Lesson 1
