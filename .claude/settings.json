@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/check-dotnet-format.js",
+            "async": true,
+            "asyncRewake": true,
+            "timeout": 60,
+            "statusMessage": "Checking .NET formatting (dotnet format)..."
+          }
+        ]
+      }
+    ]
+  }
+}
