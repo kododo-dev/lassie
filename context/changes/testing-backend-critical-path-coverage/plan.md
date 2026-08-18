@@ -466,23 +466,23 @@ production write paths under test (unmodified).
 
 #### Automated
 
-- [x] 1.1 `dotnet build tests/Lassie.Tests/Lassie.Tests.csproj` succeeds
-- [x] 1.2 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj` runs cleanly (0 tests collected is expected at this phase)
-- [x] 1.3 Fixture smoke test confirms container start, migrations applied, host responds
+- [x] 1.1 `dotnet build tests/Lassie.Tests/Lassie.Tests.csproj` succeeds — 30c4cfc
+- [x] 1.2 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj` runs cleanly (0 tests collected is expected at this phase) — 30c4cfc
+- [x] 1.3 Fixture smoke test confirms container start, migrations applied, host responds — 30c4cfc
 
 #### Manual
 
-- [x] 1.4 Docker running locally; `dotnet test` for this phase completes in well under a minute
+- [x] 1.4 Docker running locally; `dotnet test` for this phase completes in well under a minute — 30c4cfc
 
 ### Phase 2: Risk #1 — License Status Precedence
 
 #### Automated
 
-- [ ] 2.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter LicenseStatusTests` passes, all rows green
+- [x] 2.1 `dotnet test tests/Lassie.Tests/Lassie.Tests.csproj --filter LicenseStatusTests` passes, all rows green
 
 #### Manual
 
-- [ ] 2.2 Spot-check one boundary row's expected value against `context/foundation/prd.md` FR-007/FR-010 by hand
+- [x] 2.2 Spot-check one boundary row's expected value against `context/foundation/prd.md` FR-007/FR-010 by hand
 
 ### Phase 3: Risk #2 — API Key Secrecy
 
