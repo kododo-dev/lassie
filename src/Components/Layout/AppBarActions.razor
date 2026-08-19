@@ -16,6 +16,7 @@
 
 <MudIconButton Icon="@(ThemeState.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                Color="Color.Inherit"
+               aria-label="Toggle dark mode"
                OnClick="@(() => ThemeState.IsDarkMode = !ThemeState.IsDarkMode)" />
 
 <div style="position: relative; display: inline-block;">

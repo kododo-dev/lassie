@@ -23,6 +23,8 @@
          version lassie.dll is actually compiled against and fails with CS1705. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.10" />
+    <PackageReference Include="bunit" Version="2.9.0" />
   </ItemGroup>
 
   <ItemGroup>
