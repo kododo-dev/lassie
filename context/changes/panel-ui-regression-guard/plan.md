@@ -238,20 +238,20 @@ N/A — no schema or data changes.
 
 #### Automated
 
-- [x] 1.1 `dotnet build src/lassie.csproj` succeeds
-- [x] 1.2 `dotnet test src/Lassie.Tests/Lassie.Tests.csproj --filter EditLicenseTests` passes
-- [x] 1.3 Deliberate-break check: race test fails with the guard removed, passes with it restored
+- [x] 1.1 `dotnet build src/lassie.csproj` succeeds — 9261b26
+- [x] 1.2 `dotnet test src/Lassie.Tests/Lassie.Tests.csproj --filter EditLicenseTests` passes — 9261b26
+- [x] 1.3 Deliberate-break check: race test fails with the guard removed, passes with it restored — 9261b26
 
 ### Phase 2: E2E theme-toggle formalization (risk #7)
 
 #### Automated
 
-- [ ] 2.1 `npx playwright test` (auth.setup.ts + theme-toggle.spec.ts) passes against a running app
-- [ ] 2.2 `npx playwright test seed.spec.ts` passes
+- [x] 2.1 `npx playwright test` (auth.setup.ts + theme-toggle.spec.ts) passes against a running app
+- [x] 2.2 `npx playwright test seed.spec.ts` passes
 
 #### Manual
 
-- [ ] 2.3 `git status` shows no unrelated dirty files swept into this phase's commit
+- [x] 2.3 `git status` shows no unrelated dirty files swept into this phase's commit
 
 ### Phase 3: test-plan.md documentation sync
 
