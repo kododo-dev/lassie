@@ -257,4 +257,4 @@ N/A — no schema or data changes.
 
 #### Manual
 
-- [x] 3.1 Updated test-plan.md sections match what actually shipped in Phases 1-2
+- [x] 3.1 Updated test-plan.md sections match what actually shipped in Phases 1-2 — 3c1b816
