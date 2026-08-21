@@ -83,7 +83,7 @@ orchestrator updates Status as artifacts appear on disk.
 |---|---|---|---|---|---|---|
 | 1 | Backend critical-path coverage | Bootstrap the test project and defend the highest-severity, purely-backend risks first | #1, #2, #5 | unit + integration | change opened | `context/changes/testing-backend-critical-path-coverage/` |
 | 2 | Verification API boundary & abuse surface | Lock down the north star's continuously-hit external contract against outages and adversarial input | #3, #4 | integration | not started | — |
-| 3 | Panel UI regression guard | Pin the confirmed cross-license race fix and resolve the live theme-toggle regression | #6, #7 | component (bUnit) + browser smoke (TBD by research) | not started | — |
+| 3 | Panel UI regression guard | Pin the confirmed cross-license race fix and resolve the live theme-toggle regression | #6, #7 | component (bUnit) + browser smoke (Playwright) | planned | `context/changes/panel-ui-regression-guard/` |
 | 4 | Quality-gates wiring | Wire `dotnet test` into the existing GitHub Actions deploy workflow as a required pre-deploy gate | cross-cutting | gates | not started | — |
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
@@ -97,8 +97,8 @@ the runner.
 | Layer | Tool | Version | Notes |
 |---|---|---|---|
 | unit + integration | xUnit | latest stable for net10.0 | Standard .NET test runner; pairs with `Microsoft.AspNetCore.Mvc.Testing`/`WebApplicationFactory` for integration tests against the minimal-API verify endpoint. None yet — see Phase 1. |
-| component (Blazor) | bUnit | latest compatible with net10.0/MudBlazor 9.x | Needed for Risk #6/#7 component-level tests in Phase 3. None yet — see Phase 3. |
-| e2e / browser smoke | none yet | n/a | Only being considered for Risk #7 if research confirms component testing can't span the render-mode boundary — see Phase 3. |
+| component (Blazor) | bUnit | 2.9.0 | Renders `EditLicense.razor` in-process against `Services.AddMudServices()` + `JSInterop.Mode = JSRuntimeMode.Loose`; covers Risk #6 (cross-license race). Shipped in Phase 3 — see §6.3. |
+| e2e / browser smoke | Playwright (`@playwright/test`) | ^1.55.0, in `e2e/` | Needed because Risk #7 crosses a render-mode boundary bUnit's in-process render can't span — confirmed by a deliberate-break check during Phase 3 (see §6.6). Shipped in Phase 3 — see §6.4. |
 | AI-native | none | n/a | Not justified under cost × signal for this project's size (single admin, small surface) — no AI-native row proposed in this rollout. |
 
 **Stack grounding tools (current session):**
@@ -118,7 +118,7 @@ phase lands; before that, the gate is `planned`.
 | build (`dotnet build`) | local + CI | required (already wired — `.github/workflows/deploy.yml`) | compile/type drift |
 | unit + integration (`dotnet test`) | local + CI | required after §3 Phase 1 | logic regressions (status precedence, key secrecy, audit correctness, verify-endpoint contract) |
 | component tests (bUnit) | local + CI | required after §3 Phase 3 | Blazor/MudBlazor UI-interaction regressions |
-| browser smoke (theme toggle) | CI on PR, or manual pre-deploy | optional, decided in Phase 3 | render-mode-boundary bugs component tests can't reach |
+| browser smoke (theme toggle, Playwright) | manual pre-deploy (`npx playwright test` from `e2e/`) | optional — not yet wired into CI (see §3 Phase 4) | render-mode-boundary bugs component tests can't reach |
 | pre-prod smoke | between merge + prod | optional | environment-specific failures on the live VPS deploy |
 
 ## 6. Cookbook Patterns
@@ -182,13 +182,89 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.3 Adding a component (Blazor) test
 
-- TBD — see §3 Phase 3 (cross-license race regression, theme-toggle render-scope).
+- **Location**: `src/Lassie.Tests/Components/` — mirrors `src/Components/`.
+- **Naming**: `<Component>Tests.cs`, one test class per component under test.
+- **Setup**: derive from bUnit's `BunitContext` (bunit 2.x). In the
+  constructor, call `Services.AddMudServices()` first, then register any
+  fakes for MudBlazor-adjacent services (e.g. `Services.AddScoped<IDialogService>(_ => dialogService)`)
+  — later registrations win for scoped/singleton resolution, so fakes must
+  come *after* `AddMudServices()`. Set `JSInterop.Mode = JSRuntimeMode.Loose`
+  so the JS interop calls MudBlazor components make for ripple/positioning
+  effects no-op instead of throwing.
+- **Dialog-dependent components**: hand-write a minimal fake (e.g.
+  `Lassie.Tests.Infrastructure.FakeDialogService`) implementing only the one
+  `IDialogService` overload the component under test calls as a normal
+  method; every other member is an explicit interface implementation that
+  throws `NotSupportedException`. Expose a `TaskCompletionSource<bool?>` the
+  test controls directly, so a test can render, trigger the dialog, do
+  something *while it's still open* (e.g. re-render with different
+  parameters to simulate Blazor Server reusing a component instance across
+  navigation), and only then resolve the dialog — this is what makes a race
+  reproducible, not just the dialog's eventual result. Don't reach for a
+  mocking library (Moq/NSubstitute) for this — a hand-written fake is
+  smaller and the interface surface is tiny.
+- **DB-backed components (non-audit paths only)**: seed a real
+  `LassieDbContext` backed by `Microsoft.EntityFrameworkCore.InMemory`
+  (unique `Guid`-named database per test), registered via
+  `Services.AddSingleton(dbContext)`. This is narrower than §6.2's
+  "never mock `LassieDbContext`" policy: InMemory is acceptable *only* when
+  the component under test never calls `SaveChangesAsync` on an auditable
+  entity (InMemory doesn't reproduce `OriginalValues`/`ChangeTracker`
+  semantics behind the load-before-mutate audit guarantee — see Risk #5).
+  For anything that saves and must have its audit snapshot verified, use
+  §6.2's Testcontainers-backed integration test instead.
+- **Teardown**: if `Services.AddMudServices()` is in play, implement xUnit's
+  `IAsyncLifetime` and dispose the `BunitContext` via its
+  `IAsyncDisposable` (`await ((IAsyncDisposable)this).DisposeAsync()`) —
+  MudBlazor registers at least one internal service
+  (`PointerEventsNoneService`) as `IAsyncDisposable`-only, which a plain
+  synchronous `Dispose()` can't tear down cleanly.
+- **Reference test**: `src/Lassie.Tests/Components/EditLicenseTests.cs` (race
+  regression + confirm/cancel sanity checks for Risk #6) and
+  `src/Lassie.Tests/Infrastructure/FakeDialogService.cs` (the fake pattern
+  above).
+- **Run**: `dotnet test src/Lassie.Tests/Lassie.Tests.csproj --filter <ClassName>`
 
-### 6.4 Adding a test for a new API endpoint
+**When a component test isn't enough** (Risk #7): a render-mode boundary
+(e.g. between a per-page `@rendermode`-consuming component and a shared
+provider like `MudProviders.razor`) can't be reproduced by a single bUnit
+render tree — bUnit renders one component graph in-process, not two
+independently-hosted render scopes. That gap is covered by a real browser
+test instead — see the Playwright setup below.
+
+### 6.4 Adding a browser (Playwright) test
+
+- **Location**: `e2e/*.spec.ts`, project root sibling `e2e/playwright.config.ts`.
+- **Auth**: `e2e/auth.setup.ts` is a Playwright project dependency that logs
+  in once and saves `storageState`; regular specs reuse that state instead
+  of logging in per-test.
+- **Locators**: `getByRole`/`getByLabel`/`getByText` only — never CSS
+  selectors, XPath, or DOM structure (see root `CLAUDE.md`). If a target
+  element has no accessible name, that's usually a real accessibility gap
+  worth fixing in the component (e.g. `AppBarActions.razor`'s theme-toggle
+  button needed an `aria-label` added for this reason), not a reason to fall
+  back to a `data-testid`.
+- **Waits**: wait for state (`toBeVisible()`, `waitForURL()`,
+  `waitForResponse()`), never `page.waitForTimeout()`.
+- **Independence**: every spec creates its own data with a
+  `Date.now()`-suffixed label and doesn't depend on another spec's leftover
+  state; the app has no delete feature, so specs that create a license (e.g.
+  the seed test) treat an unused, uniquely-labeled leftover license as an
+  acceptable terminal state rather than attempting deletion-based cleanup.
+- **Reference tests**: `e2e/theme-toggle.spec.ts` (Risk #7 — verified with a
+  deliberate-break check, see §6.6) and `e2e/seed.spec.ts` (the four E2E
+  quality patterns — role-based locators, independence, wait-for-state,
+  risk-tied naming — demonstrated against a real create-license flow; the
+  exemplar future generated tests should be modeled on).
+- **Run**: from `e2e/`, `npx playwright test` (all specs) or
+  `npx playwright test <file>.spec.ts` against the app running on
+  `http://localhost:5092`.
+
+### 6.5 Adding a test for a new API endpoint
 
 - TBD — see §3 Phase 2 (establishes the reference pattern for testing minimal-API endpoints against `LassieDbContext`).
 
-### 6.5 Per-rollout-phase notes
+### 6.6 Per-rollout-phase notes
 
 (Filled in by `/10x-implement` as each phase ships.)
 
@@ -201,6 +277,24 @@ the relevant rollout phase ships; before that, the sub-section reads
   `<Compile Remove="Lassie.Tests/**" />` (+ `Content`/`EmbeddedResource`/`None`)
   entries, since the test project now sits *inside* the app project's own
   directory and would otherwise be swept up by its implicit globs.
+- **Phase 3** (`panel-ui-regression-guard`): bUnit lives in the existing
+  `src/Lassie.Tests` project, not a separate csproj (same rationale as
+  Phase 1's single-project layout). `FakeDialogService` is hand-written, not
+  built on a mocking library (Moq/NSubstitute) — the `IDialogService`
+  surface actually exercised is one method. EF Core InMemory is scoped
+  narrowly to component tests that don't call `SaveChangesAsync` on an
+  auditable entity (see §6.3) — it does not loosen §6.2's
+  never-mock-`LassieDbContext` policy for integration tests, since InMemory
+  doesn't reproduce `OriginalValues`/`ChangeTracker` semantics. Risk #6's
+  race test was deliberate-break checked: reverting `EditLicense.razor`'s
+  `if (license?.Id != licenseId) { return; }` guard to a no-op made the race
+  test fail; restoring it made it pass again. Risk #7's Playwright work
+  (render-mode-boundary theme-toggle bug) predates this change folder — it
+  was implemented and deliberate-break checked (temporarily removing
+  `ThemeState.OnChange += StateHasChanged;` in `MudProviders.razor`
+  reproduced the exact "state flips, UI doesn't" bug) in a standalone
+  `/10x-e2e` run before `panel-ui-regression-guard` existed, and formalized
+  (committed, seed test added) by this phase.
 
 ## 7. What We Deliberately Don't Test
 
@@ -210,7 +304,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 ## 8. Freshness Ledger
 
 - Strategy (§1–§5) last reviewed: 2026-08-18
-- Stack versions last verified: 2026-08-18
+- Stack versions last verified: 2026-08-21
 - AI-native tool references last verified: n/a (none proposed)
 
 Refresh (`/10x-test-plan --refresh`) when:
