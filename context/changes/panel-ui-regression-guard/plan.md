@@ -246,12 +246,12 @@ N/A — no schema or data changes.
 
 #### Automated
 
-- [x] 2.1 `npx playwright test` (auth.setup.ts + theme-toggle.spec.ts) passes against a running app
-- [x] 2.2 `npx playwright test seed.spec.ts` passes
+- [x] 2.1 `npx playwright test` (auth.setup.ts + theme-toggle.spec.ts) passes against a running app — c7a409c
+- [x] 2.2 `npx playwright test seed.spec.ts` passes — c7a409c
 
 #### Manual
 
-- [x] 2.3 `git status` shows no unrelated dirty files swept into this phase's commit
+- [x] 2.3 `git status` shows no unrelated dirty files swept into this phase's commit — c7a409c
 
 ### Phase 3: test-plan.md documentation sync
 
