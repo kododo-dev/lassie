@@ -6,8 +6,10 @@ namespace Lassie.Tests.Infrastructure;
 // Minimal IDialogService test double for EditLicenseTests. Only the ShowMessageBoxAsync
 // overload EditLicense.razor actually calls is implemented as a normal method; every
 // other member is an explicit interface implementation throwing NotSupportedException —
-// out of scope for the tests that use this fake. The two events are never raised, which
-// is fine: EditLicense talks to this fake directly and never touches MudDialogProvider.
+// out of scope for the tests that use this fake. The two events must stay no-op, not
+// throw: MudDialogProvider (rendered inside <MudProviders /> in EditLicense.razor)
+// subscribes to DialogInstanceAddedAsync unconditionally in OnInitialized(), even though
+// nothing in these tests ever raises it — a throwing accessor blows up every render.
 public class FakeDialogService : IDialogService
 {
     public TaskCompletionSource<bool?> MessageBoxResult { get; } = new();

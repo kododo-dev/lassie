@@ -42,7 +42,11 @@ public class EditLicenseTests : BunitContext, IAsyncLifetime
 
     Task IAsyncLifetime.InitializeAsync() => Task.CompletedTask;
 
-    async Task IAsyncLifetime.DisposeAsync() => await ((IAsyncDisposable)this).DisposeAsync();
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await ((IAsyncDisposable)this).DisposeAsync();
+        await dbContext.DisposeAsync();
+    }
 
     [Fact]
     public async Task DeactivatingLicenseA_DoesNotAffectLicenseB_WhenNavigationLandsMidConfirmation()
@@ -56,6 +60,10 @@ public class EditLicenseTests : BunitContext, IAsyncLifetime
         // to a different license's edit URL while that confirmation is still open.
         cut.Render(p => p.Add(x => x.Id, 2));
 
+        // Relies on OnParametersSetAsync's query (EF Core InMemory) completing
+        // synchronously above, so `license`/`Model` are already reassigned to
+        // license B by the time this SetResult resumes the suspended
+        // HandleIsActiveChanged continuation.
         dialogService.MessageBoxResult.SetResult(true);
 
         cut.WaitForAssertion(() =>
