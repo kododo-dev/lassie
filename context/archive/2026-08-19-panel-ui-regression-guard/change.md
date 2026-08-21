@@ -1,10 +1,10 @@
 ---
 change_id: panel-ui-regression-guard
 title: Panel UI regression guard for cross-license race and theme toggle
-status: impl_reviewed
+status: archived
 created: 2026-08-19
 updated: 2026-08-21
-archived_at: null
+archived_at: 2026-08-21T19:43:55Z
 ---
 
 ## Notes
