@@ -31,3 +31,23 @@
 **Rule**: (TBD — fill in the actionable rule)
 
 **Applies to**: (TBD — fill in which future work this constrains)
+
+## Blazor Server's per-circuit DbContext accumulates tracked entities unless explicitly detached
+
+**Context**: src/Components/Pages/CreateLicense.razor:68-85 (license-creation-and-verification F2), src/Components/Pages/EditLicense.razor:86 (license-edit-with-audit-history F3), src/Components/Pages/PanelHome.razor:60 (license-list-view F1) — surfaced independently in three separate impl-reviews before being named as a pattern.
+
+**Problem**: Blazor Server injects one `DbContext` per circuit (long-lived, not per-request/per-scope like a typical web request). Any query or save that doesn't explicitly detach the entity afterward — or use `.AsNoTracking()` for read-only queries — leaves it attached to the change tracker for the rest of the circuit's lifetime. This was found three times independently: `CreateLicense.razor` detached only on the failure path, not on success; `EditLicense.razor` never detached after save (fixed by detaching the *previous* entity on next load instead, since the page must stay editable across repeat saves); `PanelHome.razor`'s read-only list query had no `.AsNoTracking()` at all.
+
+**Rule**: Any `DbContext` read or write inside a Blazor Server per-circuit-scoped component must either (a) use `.AsNoTracking()` for read-only queries, or (b) explicitly detach entities once no longer needed (post-save, or right before loading a different entity in the same page instance). Don't rely on the circuit ending soon — sessions can be long-lived.
+
+**Applies to**: Any future Blazor Server page/component that queries or mutates entities via the circuit-scoped `DbContext`.
+
+## Shared integration-test fixtures need null-guarded teardown and must document commits outside the per-test rollback
+
+**Context**: src/Lassie.Tests/Infrastructure/IntegrationTestBase.cs:17-46 (testing-backend-critical-path-coverage F1, F2) — two related gaps found in the same review, not (yet) recurring across separate changes like the DbContext lesson above, but worth naming before more tests build on this fixture.
+
+**Problem**: `InitializeAsync` assigns `_connection`, `Factory`, `HttpClient`, `_transaction`, and `DbContext` sequentially across several fallible `await`s. If any step throws before the last assignment, later fields stay `null!`, and `DisposeAsync` dereferenced them unconditionally — so a partial `InitializeAsync` failure surfaced as a masking `NullReferenceException` instead of the real error, and skipped disposing whatever *was* acquired. Separately, `Factory.CreateClient()` runs `Migrate()` + an admin-user seed *before* the per-test transaction begins (intentional, to avoid nesting migration transactions) — that seed insert is a real, non-rolled-back commit against the collection-shared Postgres container, so the seeded admin `User` row persists across every test in the run as an undocumented order-dependent side effect.
+
+**Rule**: Any shared test fixture that acquires multiple fallible resources sequentially must null-guard every field in its async teardown, regardless of how far setup got. When setup intentionally commits data outside the per-test rollback boundary (e.g., migrations/seed data that can't be transaction-nested), document that specific side effect where the fixture is defined, so a later test asserting on that table doesn't hit a confusing pre-existing row.
+
+**Applies to**: `IntegrationTestBase` and any future shared test fixture using the Testcontainers/shared-collection + per-test-transaction rollback pattern.
