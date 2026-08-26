@@ -1,0 +1,72 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history - otherwise there's nothing to diff the base branch against
+
+      - name: Configure node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install agent dependencies
+        working-directory: agents/code-review
+        run: npm ci
+
+      - name: Compute PR diff and run review
+        id: review
+        working-directory: agents/code-review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          git diff "origin/${{ github.base_ref }}...HEAD" > /tmp/pr.diff
+          npx tsx review.ts < /tmp/pr.diff | tee /tmp/review.json
+
+      - name: Post review comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERDICT=$(jq -r .verdict /tmp/review.json)
+          SUMMARY=$(jq -r .summary /tmp/review.json)
+          {
+            echo "## 🤖 AI Code Review — verdict: **$VERDICT**"
+            echo
+            echo "$SUMMARY"
+            echo
+            echo "| Kryterium | Ocena |"
+            echo "|---|---|"
+            echo "| Poprawność implementacji | $(jq -r .implementationCorrectness /tmp/review.json)/10 |"
+            echo "| Idiomatyczność | $(jq -r .idiomaticity /tmp/review.json)/10 |"
+            echo "| Złożoność | $(jq -r .complexity /tmp/review.json)/10 |"
+            echo "| Pokrycie testami | $(jq -r .testRiskCoverage /tmp/review.json)/10 |"
+            echo "| Bezpieczeństwo | $(jq -r .securitySafety /tmp/review.json)/10 |"
+          } > /tmp/comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/comment.md
+          if [ "$VERDICT" = "fail" ]; then
+            gh pr edit "${{ github.event.pull_request.number }}" --add-label "ai-cr:failed" --remove-label "ai-cr:passed" || true
+          else
+            gh pr edit "${{ github.event.pull_request.number }}" --add-label "ai-cr:passed" --remove-label "ai-cr:failed" || true
+          fi
+
+      - name: Gate on verdict
+        run: |
+          VERDICT=$(jq -r .verdict /tmp/review.json)
+          if [ "$VERDICT" = "fail" ]; then
+            echo "AI review verdict was FAIL — see the PR comment for details."
+            exit 1
+          fi
