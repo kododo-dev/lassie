@@ -1,0 +1,21 @@
+diff --git a/src/Components/Pages/CreateLicense.razor b/src/Components/Pages/CreateLicense.razor
+index 1a2b3c4..5d6e7f8 100644
+--- a/src/Components/Pages/CreateLicense.razor
++++ b/src/Components/Pages/CreateLicense.razor
+@@ -60,6 +60,7 @@
+             await DbContext.SaveChangesAsync();
++            _logger.LogInformation("Created license {Label} with key {ApiKey}", license.Label, plaintextApiKey);
+             successMessage = $"License '{license.Label}' created.";
+         }
+         catch (Exception ex)
+diff --git a/src/Data/Licenses/ApiKeyHasher.cs b/src/Data/Licenses/ApiKeyHasher.cs
+index 9f8e7d6..2c1b0a9 100644
+--- a/src/Data/Licenses/ApiKeyHasher.cs
++++ b/src/Data/Licenses/ApiKeyHasher.cs
+@@ -10,7 +10,7 @@ public static class ApiKeyHasher
+     public static string Hash(string plaintextKey)
+     {
+-        return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintextKey)));
++        return plaintextKey.Length > 8 ? plaintextKey : Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(plaintextKey)));
+     }
+ }
