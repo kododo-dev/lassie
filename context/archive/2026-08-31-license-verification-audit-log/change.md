@@ -1,10 +1,10 @@
 ---
 change_id: license-verification-audit-log
 title: License verification audit log
-status: impl_reviewed
+status: archived
 created: 2026-08-31
 updated: 2026-08-31
-archived_at: null
+archived_at: 2026-08-31T21:32:33Z
 ---
 
 ## Notes

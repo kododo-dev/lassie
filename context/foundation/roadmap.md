@@ -41,7 +41,7 @@ A company that ships its own product to many customer deployments has no central
 | S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | done |
 | S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | done |
 | S-06 | `admin-panel-ui-refresh`            | Admin uses a panel that's visually polished and pleasant, not just functional — every screen shipped so far (login, list, create/edit, audit history) | F-02, S-02, S-03, S-05 | NFR (panel usability/readability) | done |
-| S-07 | `license-verification-audit-log`     | Admin opens a license and sees its full verification history — every API check with timestamp, caller IP, and call parameters/result | S-02, F-01, F-02, S-05 | scope addition beyond PRD v1 (relates FR-009, FR-010, FR-006) | in-progress |
+| S-07 | `license-verification-audit-log`     | Admin opens a license and sees its full verification history — every API check with timestamp, caller IP, and call parameters/result | S-02, F-01, F-02, S-05 | scope addition beyond PRD v1 (relates FR-009, FR-010, FR-006) | done |
 
 ## Streams
 
@@ -193,7 +193,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - The "API key never in plaintext, not even in logs the operator can see" NFR applies directly — the audit entry stores the resolved license identity, never the API key (raw or reconstructable).
   - Append-only, like the FR-006 edit history — audit rows are never editable or deletable from the panel UI (retention pruning, if adopted, is a separate mechanism, not an admin action).
   - This is the first foundation stone toward the target-state "unauthorized license-sharing detection" goal (FR-009 Socrates note, Non-Goals). Keep the schema shape (per-call rows, IP, timestamp) friendly to that later use without building any detection logic now.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -244,3 +244,4 @@ Lifted from PRD `## Non-Goals` — MVP scope was already deliberately trimmed du
 - **S-05: Admin views the list of licenses and each one's current status.** — Archived 2026-08-10 → `context/archive/2026-08-10-license-list-view/`. Lesson: —.
 - **S-06: The admin panel looks and feels intentional — clean layout, consistent spacing/typography, clear visual hierarchy — instead of the current bare-bones styling. Covers every screen shipped so far: login (F-02), license create/edit (S-02/S-03), audit history (S-03), and the license list (S-05). Deactivate/reactivate (S-04) picks up the same design once it ships, whether S-06 lands before or after it.** — Archived 2026-08-11 → `context/archive/2026-08-11-admin-panel-ui-refresh/`. Lesson: MudBlazor providers must live in the same render scope as per-page @rendermode consumers (see `context/foundation/lessons.md`).
 - **S-04: Admin deactivates a license and can later reactivate it — deactivation is a reversible state, not permanent.** — Archived 2026-08-12 → `context/archive/2026-08-12-license-deactivate-reactivate/`. Lesson: —.
+- **S-07: Every call to the verification API is recorded as an audit entry — timestamp, the resolved license, the caller's IP address, and the call parameters/outcome (validity result returned, auth outcome: valid / invalid / missing key). The admin can open any license and view its chronological verification history alongside the existing edit-audit history.** — Archived 2026-08-31 → `context/archive/2026-08-31-license-verification-audit-log/`. Lesson: —.
