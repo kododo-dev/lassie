@@ -557,35 +557,35 @@ connection to the `postgres:17` Testcontainer, no host; teardown deletes seeded 
 
 #### Automated
 
-- [x] 2.1 Build, `dotnet format --verify-no-changes`, full `dotnet test` green (test factory does `RemoveAll<IHostedService>()`)
-- [x] 2.2 Enqueue seam: resolved call enqueues one event with correct `LicenseId` / `ObservedStatus`
-- [x] 2.3 Enqueue seam: `X-Forwarded-For` → `ClientIp`; no header → `ClientIp` null
-- [x] 2.4 Enqueue seam: missing key and unknown key enqueue nothing
-- [x] 2.5 `VerifyEndpointKeySecrecyTests` still green
-- [x] 2.6 Writer seam: draining N events persists N rows; a forced `SaveChangesAsync` failure is logged and the loop survives
-- [x] 2.7 Retention seam: over-age row deleted by one sweep, fresh row kept
-- [x] 2.8 Enqueue seam: when the substituted queue's `Enqueue` throws, the verify call still returns `200`
+- [x] 2.1 Build, `dotnet format --verify-no-changes`, full `dotnet test` green (test factory does `RemoveAll<IHostedService>()`) — dcc109f
+- [x] 2.2 Enqueue seam: resolved call enqueues one event with correct `LicenseId` / `ObservedStatus` — dcc109f
+- [x] 2.3 Enqueue seam: `X-Forwarded-For` → `ClientIp`; no header → `ClientIp` null — dcc109f
+- [x] 2.4 Enqueue seam: missing key and unknown key enqueue nothing — dcc109f
+- [x] 2.5 `VerifyEndpointKeySecrecyTests` still green — dcc109f
+- [x] 2.6 Writer seam: draining N events persists N rows; a forced `SaveChangesAsync` failure is logged and the loop survives — dcc109f
+- [x] 2.7 Retention seam: over-age row deleted by one sweep, fresh row kept — dcc109f
+- [x] 2.8 Enqueue seam: when the substituted queue's `Enqueue` throws, the verify call still returns `200` — dcc109f
 
 #### Manual
 
-- [x] 2.9 `curl` with valid key + spoofed `X-Forwarded-For` → row within ~1s, unchanged `time_total`
-- [x] 2.10 Brief load test → row count ≈ requests, drop warnings noted
-- [x] 2.11 Ctrl+C mid-load → buffered rows flushed on shutdown
-- [x] 2.12 `RetentionDays=1` → sweep deletes only the aged row; `RetentionDays=0` → sweep skipped with a Warning
+- [x] 2.9 `curl` with valid key + spoofed `X-Forwarded-For` → row within ~1s, unchanged `time_total` — dcc109f
+- [x] 2.10 Brief load test → row count ≈ requests, drop warnings noted — dcc109f
+- [x] 2.11 Ctrl+C mid-load → buffered rows flushed on shutdown — dcc109f
+- [x] 2.12 `RetentionDays=1` → sweep deletes only the aged row; `RetentionDays=0` → sweep skipped with a Warning — dcc109f
 
 ### Phase 3: Panel history view
 
 #### Automated
 
-- [ ] 3.1 Build + `dotnet format --verify-no-changes`
-- [ ] 3.2 bUnit: grid renders first page newest-first for a license with N seeded events
-- [ ] 3.3 bUnit: unknown `Id` renders the "not found" alert
-- [ ] 3.4 Full suite green: `dotnet test`
+- [x] 3.1 Build + `dotnet format --verify-no-changes`
+- [x] 3.2 bUnit: grid renders first page newest-first for a license with N seeded events
+- [x] 3.3 bUnit: unknown `Id` renders the "not found" alert
+- [x] 3.4 Full suite green: `dotnet test`
 
 #### Manual
 
-- [ ] 3.5 History icon on the license list opens the new page for that license
-- [ ] 3.6 Grid paging (next/prev, page-size) works against >100 seeded events, newest first
-- [ ] 3.7 IP / status badge / User-Agent columns render; empty values show "—"
-- [ ] 3.8 Edit page "Verification history" link lands on the right license
-- [ ] 3.9 Responsive check at narrow width
+- [x] 3.5 History icon on the license list opens the new page for that license
+- [x] 3.6 Grid paging (next/prev, page-size) works against >100 seeded events, newest first
+- [x] 3.7 IP / status badge / User-Agent columns render; empty values show "—"
+- [x] 3.8 Edit page "Verification history" link lands on the right license
+- [x] 3.9 Responsive check at narrow width

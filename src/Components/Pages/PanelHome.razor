@@ -40,7 +40,8 @@ else
                 </PropertyColumn>
                 <TemplateColumn Sortable="false" Filterable="false">
                     <CellTemplate>
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Href="@($"licenses/{context.Item.Id}/edit")" />
+                        <MudIconButton Icon="@Icons.Material.Filled.History" Title="Verification history" Href="@($"licenses/{context.Item.Id}/verifications")" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Title="Edit" Href="@($"licenses/{context.Item.Id}/edit")" />
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>

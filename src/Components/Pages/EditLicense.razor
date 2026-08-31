@@ -38,6 +38,7 @@ else
         <MudSwitch @key="switchRenderKey" T="bool" Value="Model.IsActive" ValueChanged="HandleIsActiveChanged" Label="@(Model.IsActive ? "Active" : "Inactive")" Color="Color.Success" Class="mb-4" />
         <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
         <MudButton Href="/" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton Href="@($"licenses/{Id}/verifications")" Variant="Variant.Text">Verification history</MudButton>
     </EditForm>
 }
 

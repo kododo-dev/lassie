@@ -1,0 +1,107 @@
+@page "/licenses/{Id:long}/verifications"
+@attribute [Authorize]
+@layout MainLayout
+@rendermode InteractiveServer
+@using Lassie.Components.Shared
+@using Lassie.Data
+@using Lassie.Data.Licenses
+@using Microsoft.EntityFrameworkCore
+@inject LassieDbContext DbContext
+
+<PageTitle>Verification History — Lassie</PageTitle>
+
+<MudProviders />
+
+@if (licenseLabel is null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4">License not found.</MudAlert>
+    <MudButton Href="/" Variant="Variant.Text">Back</MudButton>
+}
+else
+{
+    <div class="d-flex align-center gap-2 mb-4">
+        <h1 class="mr-auto">Verification history — @licenseLabel</h1>
+        <MudButton Href="@($"licenses/{Id}/edit")" Variant="Variant.Text">Edit license</MudButton>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <MudDataGrid @ref="_grid" T="LicenseVerificationEvent" ServerData="LoadAsync" Hover="true" Dense="true">
+            <Columns>
+                <TemplateColumn Title="Occurred (UTC)" Sortable="false">
+                    <CellTemplate>
+                        @context.Item.OccurredAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss")
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Caller IP" Sortable="false">
+                    <CellTemplate>@(context.Item.ClientIp ?? "—")</CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Observed status" Sortable="false">
+                    <CellTemplate>
+                        <LicenseStatusBadge Status="context.Item.ObservedStatus" />
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="User-Agent" Sortable="false">
+                    <CellTemplate>
+                        @if (string.IsNullOrEmpty(context.Item.UserAgent))
+                        {
+                            <text>—</text>
+                        }
+                        else
+                        {
+                            <MudTooltip Text="@context.Item.UserAgent">
+                                <span class="d-inline-block text-truncate" style="max-width: 22rem;">@context.Item.UserAgent</span>
+                            </MudTooltip>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <NoRecordsContent>
+                <MudText Typo="Typo.body2">No verification calls recorded for this license yet.</MudText>
+            </NoRecordsContent>
+            <PagerContent>
+                <MudDataGridPager T="LicenseVerificationEvent" RowsPerPageOptions="new[] { 25, 50, 100 }" />
+            </PagerContent>
+        </MudDataGrid>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+
+    private MudDataGrid<LicenseVerificationEvent> _grid = null!;
+    private string? licenseLabel;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        licenseLabel = await DbContext.Licenses
+            .AsNoTracking()
+            .Where(l => l.Id == Id)
+            .Select(l => l.Label)
+            .FirstOrDefaultAsync();
+
+        if (_grid is not null)
+        {
+            await _grid.ReloadServerData();
+        }
+    }
+
+    // Transient query per page — no stored List<T>, .AsNoTracking() for the long-lived
+    // per-circuit DbContext (see context/foundation/lessons.md).
+    private async Task<GridData<LicenseVerificationEvent>> LoadAsync(
+        GridState<LicenseVerificationEvent> state, CancellationToken token)
+    {
+        var query = DbContext.LicenseVerificationEvents
+            .AsNoTracking()
+            .Where(e => e.LicenseId == Id)
+            .OrderByDescending(e => e.OccurredAtUtc);
+
+        var total = await query.CountAsync(token);
+        var rows = await query
+            .Skip(state.Page * state.PageSize)
+            .Take(state.PageSize)
+            .ToListAsync(token);
+
+        return new GridData<LicenseVerificationEvent> { Items = rows, TotalItems = total };
+    }
+}
