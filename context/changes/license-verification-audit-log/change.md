@@ -1,7 +1,7 @@
 ---
 change_id: license-verification-audit-log
 title: License verification audit log
-status: implementing
+status: implemented
 created: 2026-08-31
 updated: 2026-08-31
 archived_at: null

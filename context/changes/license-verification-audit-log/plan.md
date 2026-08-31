@@ -577,15 +577,15 @@ connection to the `postgres:17` Testcontainer, no host; teardown deletes seeded 
 
 #### Automated
 
-- [x] 3.1 Build + `dotnet format --verify-no-changes`
-- [x] 3.2 bUnit: grid renders first page newest-first for a license with N seeded events
-- [x] 3.3 bUnit: unknown `Id` renders the "not found" alert
-- [x] 3.4 Full suite green: `dotnet test`
+- [x] 3.1 Build + `dotnet format --verify-no-changes` — 4b85cc2
+- [x] 3.2 bUnit: grid renders first page newest-first for a license with N seeded events — 4b85cc2
+- [x] 3.3 bUnit: unknown `Id` renders the "not found" alert — 4b85cc2
+- [x] 3.4 Full suite green: `dotnet test` — 4b85cc2
 
 #### Manual
 
-- [x] 3.5 History icon on the license list opens the new page for that license
-- [x] 3.6 Grid paging (next/prev, page-size) works against >100 seeded events, newest first
-- [x] 3.7 IP / status badge / User-Agent columns render; empty values show "—"
-- [x] 3.8 Edit page "Verification history" link lands on the right license
-- [x] 3.9 Responsive check at narrow width
+- [x] 3.5 History icon on the license list opens the new page for that license — 4b85cc2
+- [x] 3.6 Grid paging (next/prev, page-size) works against >100 seeded events, newest first — 4b85cc2
+- [x] 3.7 IP / status badge / User-Agent columns render; empty values show "—" — 4b85cc2
+- [x] 3.8 Edit page "Verification history" link lands on the right license — 4b85cc2
+- [x] 3.9 Responsive check at narrow width — 4b85cc2
