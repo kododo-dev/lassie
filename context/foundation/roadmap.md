@@ -3,7 +3,7 @@ project: Lassie
 version: 1
 status: draft
 created: 2026-08-04
-updated: 2026-08-12
+updated: 2026-08-31
 prd_version: 1
 main_goal: quality
 top_blocker: capacity
@@ -41,6 +41,7 @@ A company that ships its own product to many customer deployments has no central
 | S-04 | `license-deactivate-reactivate`     | Admin deactivates a license and later reactivates it                                   | S-02, F-01, F-02 | FR-007                             | done |
 | S-05 | `license-list-view`                 | Admin views the list of licenses and their current status                              | S-02, F-01, F-02 | FR-012                             | done |
 | S-06 | `admin-panel-ui-refresh`            | Admin uses a panel that's visually polished and pleasant, not just functional — every screen shipped so far (login, list, create/edit, audit history) | F-02, S-02, S-03, S-05 | NFR (panel usability/readability) | done |
+| S-07 | `license-verification-audit-log`     | Admin opens a license and sees its full verification history — every API check with timestamp, caller IP, and call parameters/result | S-02, F-01, F-02, S-05 | scope addition beyond PRD v1 (relates FR-009, FR-010, FR-006) | in-progress |
 
 ## Streams
 
@@ -53,6 +54,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | C      | Lifecycle control         | `S-04`                          | Joins Stream A at `S-02`. Parallel with Streams B and D — no shared prerequisites beyond `S-02`. |
 | D      | Visibility                | `S-05`                          | Joins Stream A at `S-02`. Parallel with Streams B and C; lowest risk of the three (read-only). |
 | E      | Polish & UX                | `S-02, S-03, S-05` → `S-06`     | Cross-cutting — redesigns every panel screen shipped by Streams A/B/D at once, so it's sequenced after they exist rather than joining at a single point. Independent of `S-04` (Stream C); can land before or after it. |
+| F      | Verification audit         | `S-02, S-05` → `S-07`          | Joins Stream A at `S-02` (the API being audited) and leans on `S-05` for the panel surface to hang the history view off. First net-new slice after the MVP set closed — post-MVP scope addition (2026-08-31). Independent of Stream C/E. |
 
 ## Baseline
 
@@ -174,6 +176,25 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Low functional risk (pure presentation layer, no data/behavior change), but touches every existing screen — worth a visual pass-through of the whole panel after implementation rather than screen-by-screen sign-off, to catch inconsistencies between screens.
 - **Status:** done
 
+### S-07: License verification audit log
+
+- **Outcome:** Every call to the verification API is recorded as an audit entry — timestamp, the resolved license, the caller's IP address, and the call parameters/outcome (validity result returned, auth outcome: valid / invalid / missing key). The admin can open any license and view its chronological verification history alongside the existing edit-audit history.
+- **Change ID:** `license-verification-audit-log`
+- **PRD refs:** none directly — scope addition beyond PRD v1 on the user's explicit request (2026-08-31), analogous to how S-06 went past the letter of the PRD. Related: FR-009 / FR-010 (the verification API being audited), FR-006 (the append-only edit-audit pattern this mirrors), and the FR-009 Socrates note (installation-identifier / sharing-detection foundation, deferred).
+- **Prerequisites:** S-02 (the verification API and the license entity must exist), F-01 (persistence), F-02 (panel auth), S-05 (a license surface in the panel to hang the history view off). All four are `done` — this slice is unblocked.
+- **Parallel with:** — (the only open slice)
+- **Blockers:** —
+- **Unknowns:**
+  - Boundary against the Non-Goal "Zaawansowana telemetria i analityka wykorzystania licencji" (`prd.md` → `## Non-Goals`, Niefunkcjonalne). This slice is a raw, append-only per-call audit trail viewable per license — not aggregated analytics, dashboards, or usage trends. Confirm that framing holds at `/10x-plan` time so the scope doesn't drift into the Non-Goal. — Owner: user. Block: no.
+  - Retention / volume. Every client deployment polls verification periodically, so the audit table grows without bound. Keep everything, or a retention window (last N days / last N calls per license)? — Owner: user. Block: no (keep-everything is a safe MVP default at the PRD's `target_scale` of low QPS / small data volume; naming it here so it isn't silently decided in implementation).
+  - Which call parameters beyond IP to capture — candidates: User-Agent, request timestamp, the validity result returned, the auth outcome. The API carries no installation identifier today (FR-009 Socrates note deferred that), so IP + User-Agent are the only caller signals available. — Owner: user. Block: no.
+- **Risk:**
+  - The < 500ms verification guardrail (Success Criteria) and the "distinguish service-unavailable from license-invalid" NFR both bind here: writing the audit row must not add latency to, or be able to fail, the verification response. Fire-and-forget / asynchronous write; an audit-write failure must never turn a valid license into an error for the caller.
+  - The "API key never in plaintext, not even in logs the operator can see" NFR applies directly — the audit entry stores the resolved license identity, never the API key (raw or reconstructable).
+  - Append-only, like the FR-006 edit history — audit rows are never editable or deletable from the panel UI (retention pruning, if adopted, is a separate mechanism, not an admin action).
+  - This is the first foundation stone toward the target-state "unauthorized license-sharing detection" goal (FR-009 Socrates note, Non-Goals). Keep the schema shape (per-call rows, IP, timestamp) friendly to that later use without building any detection logic now.
+- **Status:** in-progress
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                    | Ready for `/10x-plan` | Notes                                   |
@@ -186,10 +207,13 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-04       | `license-deactivate-reactivate`      | License deactivate / reactivate                            | no                      | Waiting on S-02; parallel with S-03, S-05 |
 | S-05       | `license-list-view`                  | License list view with status                              | no                      | Waiting on S-02; parallel with S-03, S-04 |
 | S-06       | `admin-panel-ui-refresh`             | Polished, elegant visual redesign of the admin panel        | **yes**                | Unblocked — F-02, S-02, S-03, S-05 all done; parallel with S-04 |
+| S-07       | `license-verification-audit-log`     | Per-license verification audit log (timestamp, caller IP, call params/result) | **yes**  | Unblocked — S-02, F-01, F-02, S-05 all done. Post-MVP scope addition (2026-08-31); confirm the Non-Goal analytics boundary at plan time |
 
 ## Open Roadmap Questions
 
-None. The PRD closed with zero open questions (`prd.md` → `## Open Questions`: "Brak nierozwiązanych kwestii"), and the Step 5 interview didn't surface a new question spanning more than one slice. The one real gap found (how the first admin account gets provisioned) is narrow enough to live as a non-blocking Unknown on F-02 rather than here.
+None spanning more than one slice. The PRD closed with zero open questions (`prd.md` → `## Open Questions`: "Brak nierozwiązanych kwestii"), and the Step 5 interview didn't surface a new question spanning more than one slice. The one real gap found (how the first admin account gets provisioned) is narrow enough to live as a non-blocking Unknown on F-02 rather than here.
+
+> Note (2026-08-31): `S-07` (license verification audit log) is a post-MVP scope addition on the user's explicit request, with no backing FR in PRD v1. Its open decisions (retention/volume policy, exact captured parameters, boundary against the "advanced telemetry/analytics" Non-Goal) are captured as non-blocking Unknowns on the slice itself. If `S-07` is picked up, the PRD should get a matching FR (or an explicit note that it extends beyond v1) before or during `/10x-plan`.
 
 ## Parked
 

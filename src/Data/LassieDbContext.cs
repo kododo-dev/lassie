@@ -11,6 +11,7 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<User> Users => Set<User>();
     public DbSet<License> Licenses => Set<License>();
+    public DbSet<LicenseVerificationEvent> LicenseVerificationEvents => Set<LicenseVerificationEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,20 @@ public class LassieDbContext(DbContextOptions<LassieDbContext> options) : DbCont
         modelBuilder.Entity<License>()
             .HasIndex(l => l.ApiKeyHash)
             .IsUnique();
+
+        modelBuilder.Entity<LicenseVerificationEvent>()
+            .HasOne(e => e.License)
+            .WithMany()
+            .HasForeignKey(e => e.LicenseId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Serves the per-license, newest-first history query.
+        modelBuilder.Entity<LicenseVerificationEvent>()
+            .HasIndex(e => new { e.LicenseId, e.OccurredAtUtc });
+
+        // Serves the retention sweep's `WHERE OccurredAtUtc < cutoff`.
+        modelBuilder.Entity<LicenseVerificationEvent>()
+            .HasIndex(e => e.OccurredAtUtc);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)

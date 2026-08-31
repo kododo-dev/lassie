@@ -86,6 +86,8 @@ Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja lice
 - FR-010: API zwraca ważność licencji. Priority: must-have
   > Socrates: Kontrargument rozważony: API mogłoby zwracać szczegółową przyczynę nieważności (wygasła vs dezaktywowana) zamiast prostego statusu. Rozwiązanie: prosty status wystarczy w MVP.
   > Zmiana (2026-08-07): pierwotnie odpowiedź miała zawierać też wartości definiowalnych pól (FR-004) — odroczone poza MVP razem z FR-004, patrz ten wpis.
+- FR-013: System zapisuje wpis audytowy dla każdego rozpoznanego wywołania API weryfikacji (znacznik czasu, licencja, adres IP wywołującego, User-Agent, zaobserwowany status licencji). Administrator może przeglądać tę historię per licencja. Priority: nice-to-have (rozszerzenie poza pierwotny zakres v1, dodane 2026-08-31 — patrz `roadmap.md` S-07).
+  > Wywołania z brakującym lub nierozpoznanym kluczem nie są zapisywane. Wykrywanie nadużyć na podstawie tych danych to osobne, przyszłe zadanie.
 
 ### Panel administracyjny
 - FR-011: Administrator can zalogować się (email + hasło). Priority: must-have
@@ -100,6 +102,7 @@ Wdrożenia klientów są rozproszone i nie zawsze online, więc weryfikacja lice
 - Panel administracyjny jest użyteczny i czytelny zarówno na ekranie desktopowym, jak i na małym ekranie (smartfon) — responsywny, bez utraty funkcjonalności
 - Panel administracyjny jest użyteczny na dwóch najnowszych wersjach głównych przeglądarek
 - Weryfikacja licencji przez API odpowiada w czasie poniżej 500ms
+- Zapis audytu weryfikacji (FR-013) nie wpływa na gwarancję < 500ms ani na rozróżnienie niedostępność/nieważność — zapis jest asynchroniczny, a jego błąd nie zmienia odpowiedzi API. Adresy IP wywołujących są przechowywane maks. 90 dni, dostępne wyłącznie dla administratora; podstawa: zapobieganie nadużyciom licencji.
 
 ## Business Logic
 
