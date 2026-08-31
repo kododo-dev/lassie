@@ -2,6 +2,7 @@ using Lassie.Components;
 using Lassie.Data;
 using Lassie.Data.Licenses;
 using Lassie.Data.Users;
+using Lassie.Data.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +44,13 @@ builder.Services.AddAuthorization();
 // PasswordHasher<TUser>'s only state is immutable config fields plus a thread-safe
 // RandomNumberGenerator — safe as a Singleton even though AddIdentityCore defaults to Scoped.
 builder.Services.AddSingleton<PasswordHasher<User>>();
+
+// Verification-audit pipeline: the verify endpoint hands each resolved call to the queue
+// (non-blocking), a background writer batch-persists them off the response path, and a
+// second background service prunes rows past the retention window.
+builder.Services.AddSingleton<IVerificationEventQueue, VerificationEventQueue>();
+builder.Services.AddHostedService<VerificationEventWriter>();
+builder.Services.AddHostedService<VerificationEventRetentionService>();
 
 var app = builder.Build();
 
@@ -140,7 +148,12 @@ app.MapGet("/weatherforecast", () =>
 // so a missing/unrecognized key returns a plain 401 rather than a cookie-scheme redirect.
 // No broad try/catch: an unexpected failure (e.g. DB unreachable) must propagate to the
 // framework's default 5xx handling, never be coerced into `valid: false`.
-app.MapGet("/api/license/verify", async (HttpRequest request, LassieDbContext context) =>
+app.MapGet("/api/license/verify", async (
+    HttpRequest request,
+    HttpContext http,
+    LassieDbContext context,
+    IVerificationEventQueue verificationEvents,
+    ILoggerFactory loggerFactory) =>
 {
     var apiKey = request.Headers["X-Api-Key"].ToString();
     if (string.IsNullOrEmpty(apiKey))
@@ -156,6 +169,29 @@ app.MapGet("/api/license/verify", async (HttpRequest request, LassieDbContext co
     }
 
     var valid = license.Status == LicenseStatus.Active;
+
+    // Audit side-effect. Building the event (reading the connection IP / headers) and the
+    // enqueue are wrapped so a failure here is logged and swallowed — a valid license must
+    // never surface as a 5xx because of audit code. The lookup above keeps its no-try/catch
+    // stance so a genuine DB outage still propagates as 5xx.
+    try
+    {
+        verificationEvents.Enqueue(new LicenseVerificationEvent
+        {
+            LicenseId = license.Id,
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            ClientIp = http.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = VerificationRequestFields.Truncate(request.Headers.UserAgent.ToString(), 512),
+            ForwardedForRaw = VerificationRequestFields.Truncate(VerificationRequestFields.ReadForwardedFor(request), 256),
+            ObservedStatus = license.Status,
+        });
+    }
+    catch (Exception ex)
+    {
+        loggerFactory.CreateLogger("Lassie.VerifyLicense")
+            .LogWarning(ex, "Failed to enqueue verification audit event for license {LicenseId}.", license.Id);
+    }
+
     return Results.Ok(new { valid });
 })
 .WithName("VerifyLicense");

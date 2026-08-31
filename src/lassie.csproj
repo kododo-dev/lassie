@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The verification-audit pipeline exposes DrainOnceAsync / SweepAsync as `internal`
+         so the writer- and retention-seam tests can drive one batch/sweep directly
+         (see context/changes/license-verification-audit-log/plan.md). -->
+    <InternalsVisibleTo Include="Lassie.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Lassie.Tests is a nested project directory under this one; without these, the
          SDK's implicit **/*.cs (and content) globs would also pull the test project's
          files into this project's own compilation. -->

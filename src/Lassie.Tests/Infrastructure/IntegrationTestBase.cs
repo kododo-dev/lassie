@@ -1,5 +1,6 @@
 using Lassie.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Xunit;
 
@@ -14,13 +15,22 @@ public abstract class IntegrationTestBase(PostgresCollectionFixture fixture) : I
     protected HttpClient HttpClient { get; private set; } = null!;
     protected LassieDbContext DbContext { get; private set; } = null!;
 
+    // Subclasses override to register/replace services in the one host the base builds.
+    // Runs during host construction (before the test transaction opens), so it's the only
+    // safe place to swap a service for an integration test — WithWebHostBuilder() inside a
+    // test method spins a second host that re-runs Migrate() on the now-transactional
+    // connection and fails with "a transaction is already in progress".
+    protected virtual void ConfigureTestServices(IServiceCollection services)
+    {
+    }
+
     public async Task InitializeAsync()
     {
         _connection = new NpgsqlConnection(fixture.ConnectionString);
         await _connection.OpenAsync();
 
         var transactionHolder = new TransactionHolder();
-        Factory = new LassieWebApplicationFactory(_connection, transactionHolder);
+        Factory = new LassieWebApplicationFactory(_connection, transactionHolder, ConfigureTestServices);
 
         // Forces host startup (Migrate() + admin seed) while the connection is still
         // transaction-free, so the app's own migration transactions never nest inside ours.

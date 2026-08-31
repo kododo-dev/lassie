@@ -543,35 +543,35 @@ connection to the `postgres:17` Testcontainer, no host; teardown deletes seeded 
 
 #### Automated
 
-- [x] 1.1 Build passes: `dotnet build src/lassie.csproj`
-- [x] 1.2 Migration applies against a clean DB (FixtureSmoke integration test)
-- [x] 1.3 `dotnet format --verify-no-changes`
-- [x] 1.4 Model snapshot regenerated — no pending-model-changes warning
+- [x] 1.1 Build passes: `dotnet build src/lassie.csproj` — 434b12f
+- [x] 1.2 Migration applies against a clean DB (FixtureSmoke integration test) — 434b12f
+- [x] 1.3 `dotnet format --verify-no-changes` — 434b12f
+- [x] 1.4 Model snapshot regenerated — no pending-model-changes warning — 434b12f
 
 #### Manual
 
-- [x] 1.5 `LicenseVerificationEvents` table + both indexes present in the DB after startup
-- [x] 1.6 `prd.md` reads cleanly with FR-013 and the NFR line
+- [x] 1.5 `LicenseVerificationEvents` table + both indexes present in the DB after startup — 434b12f
+- [x] 1.6 `prd.md` reads cleanly with FR-013 and the NFR line — 434b12f
 
 ### Phase 2: Capture pipeline
 
 #### Automated
 
-- [ ] 2.1 Build, `dotnet format --verify-no-changes`, full `dotnet test` green (test factory does `RemoveAll<IHostedService>()`)
-- [ ] 2.2 Enqueue seam: resolved call enqueues one event with correct `LicenseId` / `ObservedStatus`
-- [ ] 2.3 Enqueue seam: `X-Forwarded-For` → `ClientIp`; no header → `ClientIp` null
-- [ ] 2.4 Enqueue seam: missing key and unknown key enqueue nothing
-- [ ] 2.5 `VerifyEndpointKeySecrecyTests` still green
-- [ ] 2.6 Writer seam: draining N events persists N rows; a forced `SaveChangesAsync` failure is logged and the loop survives
-- [ ] 2.7 Retention seam: over-age row deleted by one sweep, fresh row kept
-- [ ] 2.8 Enqueue seam: when the substituted queue's `Enqueue` throws, the verify call still returns `200`
+- [x] 2.1 Build, `dotnet format --verify-no-changes`, full `dotnet test` green (test factory does `RemoveAll<IHostedService>()`)
+- [x] 2.2 Enqueue seam: resolved call enqueues one event with correct `LicenseId` / `ObservedStatus`
+- [x] 2.3 Enqueue seam: `X-Forwarded-For` → `ClientIp`; no header → `ClientIp` null
+- [x] 2.4 Enqueue seam: missing key and unknown key enqueue nothing
+- [x] 2.5 `VerifyEndpointKeySecrecyTests` still green
+- [x] 2.6 Writer seam: draining N events persists N rows; a forced `SaveChangesAsync` failure is logged and the loop survives
+- [x] 2.7 Retention seam: over-age row deleted by one sweep, fresh row kept
+- [x] 2.8 Enqueue seam: when the substituted queue's `Enqueue` throws, the verify call still returns `200`
 
 #### Manual
 
-- [ ] 2.9 `curl` with valid key + spoofed `X-Forwarded-For` → row within ~1s, unchanged `time_total`
-- [ ] 2.10 Brief load test → row count ≈ requests, drop warnings noted
-- [ ] 2.11 Ctrl+C mid-load → buffered rows flushed on shutdown
-- [ ] 2.12 `RetentionDays=1` → sweep deletes only the aged row; `RetentionDays=0` → sweep skipped with a Warning
+- [x] 2.9 `curl` with valid key + spoofed `X-Forwarded-For` → row within ~1s, unchanged `time_total`
+- [x] 2.10 Brief load test → row count ≈ requests, drop warnings noted
+- [x] 2.11 Ctrl+C mid-load → buffered rows flushed on shutdown
+- [x] 2.12 `RetentionDays=1` → sweep deletes only the aged row; `RetentionDays=0` → sweep skipped with a Warning
 
 ### Phase 3: Panel history view
 

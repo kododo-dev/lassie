@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 
 namespace Lassie.Tests.Infrastructure;
@@ -18,7 +19,10 @@ public class TransactionHolder
     public NpgsqlTransaction? Transaction { get; set; }
 }
 
-public class LassieWebApplicationFactory(NpgsqlConnection connection, TransactionHolder transactionHolder)
+public class LassieWebApplicationFactory(
+    NpgsqlConnection connection,
+    TransactionHolder transactionHolder,
+    Action<IServiceCollection>? configureServices = null)
     : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -31,7 +35,17 @@ public class LassieWebApplicationFactory(NpgsqlConnection connection, Transactio
             services.RemoveAll<DbContextOptions<LassieDbContext>>();
             services.AddDbContext<LassieDbContext>(options => options.UseNpgsql(connection));
 
+            // The verification-audit BackgroundServices resolve their own DI scope on the
+            // shared transactional connection, off the request pipeline and on a background
+            // thread — incompatible with this fixture's per-request transaction enlistment
+            // and Npgsql's single-command-per-connection rule. That pipeline is exercised in
+            // isolation instead (VerificationPipelineTests / VerifyEndpointAuditEnqueueTests).
+            services.RemoveAll<IHostedService>();
+
             services.AddSingleton<IStartupFilter>(new EnlistTransactionStartupFilter(transactionHolder));
+
+            // Per-test service overrides (last registration wins for GetRequiredService).
+            configureServices?.Invoke(services);
         });
     }
 
