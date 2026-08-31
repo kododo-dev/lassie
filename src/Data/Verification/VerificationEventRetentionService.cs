@@ -16,12 +16,21 @@ public sealed class VerificationEventRetentionService(
 {
     private static readonly TimeSpan StartupDelay = TimeSpan.FromSeconds(10);
 
+    private static readonly TimeSpan DefaultSweepInterval = TimeSpan.FromHours(6);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var interval = config.GetValue("Verification:RetentionSweepInterval", TimeSpan.FromHours(6));
-
         try
         {
+            var interval = config.GetValue("Verification:RetentionSweepInterval", DefaultSweepInterval);
+            if (interval <= TimeSpan.Zero)
+            {
+                log.LogWarning(
+                    "Verification:RetentionSweepInterval is {Interval} (<= 0); falling back to {Default}.",
+                    interval, DefaultSweepInterval);
+                interval = DefaultSweepInterval;
+            }
+
             await Task.Delay(StartupDelay, stoppingToken);
 
             using var timer = new PeriodicTimer(interval);
@@ -34,6 +43,12 @@ public sealed class VerificationEventRetentionService(
         catch (OperationCanceledException)
         {
             // Host shutting down.
+        }
+        catch (Exception ex)
+        {
+            // Defensive: a fault here would stop the host (and the verify API) via
+            // BackgroundServiceExceptionBehavior.StopHost. Better to lose retention sweeps.
+            log.LogError(ex, "Verification retention service stopped unexpectedly.");
         }
     }
 
@@ -59,12 +74,9 @@ public sealed class VerificationEventRetentionService(
                 .Where(e => e.OccurredAtUtc < cutoff)
                 .ExecuteDeleteAsync(ct);
 
-            if (deleted > 0)
-            {
-                log.LogInformation(
-                    "Retention sweep deleted {Deleted} verification audit event(s) older than {Days} day(s).",
-                    deleted, days);
-            }
+            log.LogInformation(
+                "Retention sweep deleted {Deleted} verification audit event(s) older than {Days} day(s).",
+                deleted, days);
         }
         catch (OperationCanceledException)
         {

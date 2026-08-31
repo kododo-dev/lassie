@@ -24,7 +24,7 @@ public sealed class VerificationEventQueue : IVerificationEventQueue
     public VerificationEventQueue(IConfiguration config, ILogger<VerificationEventQueue> log)
     {
         _log = log;
-        var capacity = config.GetValue("Verification:QueueCapacity", 10_000);
+        var capacity = Math.Max(1, config.GetValue("Verification:QueueCapacity", 10_000));
         _channel = Channel.CreateBounded<LicenseVerificationEvent>(
             new BoundedChannelOptions(capacity)
             {

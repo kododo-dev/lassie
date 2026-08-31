@@ -29,7 +29,7 @@ else
             <Columns>
                 <TemplateColumn Title="Occurred (UTC)" Sortable="false">
                     <CellTemplate>
-                        @context.Item.OccurredAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss")
+                        @context.Item.OccurredAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss' UTC'")
                     </CellTemplate>
                 </TemplateColumn>
                 <TemplateColumn Title="Caller IP" Sortable="false">

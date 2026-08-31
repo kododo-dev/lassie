@@ -30,13 +30,26 @@ public sealed class VerificationEventWriter(
         {
             // Host is shutting down — StopAsync flushes whatever is still buffered.
         }
+        catch (Exception ex)
+        {
+            // Defensive: an unhandled exception here would fault the host
+            // (BackgroundServiceExceptionBehavior.StopHost) and take the verify API down with
+            // it. Losing the audit writer is the lesser evil.
+            log.LogError(ex, "Verification audit writer stopped unexpectedly.");
+        }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        // base.StopAsync signals the stopping token and waits for ExecuteAsync to exit, so
-        // the drain below is the only reader by the time it runs (SingleReader holds).
         await base.StopAsync(cancellationToken);
+
+        // base.StopAsync returns early if host shutdown times out while ExecuteAsync is still
+        // running — draining then would be a second concurrent reader on a SingleReader
+        // channel. Only flush the remainder once ExecuteAsync has actually exited.
+        if (ExecuteTask?.IsCompleted != true)
+        {
+            return;
+        }
 
         while (queue.Reader.Count > 0)
         {
