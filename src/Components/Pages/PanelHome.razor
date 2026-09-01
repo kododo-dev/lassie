@@ -38,6 +38,13 @@ else
                         @(context.Item.ExpiresOn is not null ? context.Item.ExpiresOn.Value.ToString("yyyy-MM-dd") : "No expiry")
                     </CellTemplate>
                 </PropertyColumn>
+                <TemplateColumn Title="Last verified" Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        @(lastVerifiedByLicenseId.TryGetValue(context.Item.Id, out var lastVerifiedAtUtc)
+                            ? lastVerifiedAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm' UTC'")
+                            : "Never")
+                    </CellTemplate>
+                </TemplateColumn>
                 <TemplateColumn Sortable="false" Filterable="false">
                     <CellTemplate>
                         <MudIconButton Icon="@Icons.Material.Filled.History" Title="Verification history" Href="@($"licenses/{context.Item.Id}/verifications")" />
@@ -52,10 +59,20 @@ else
 @code {
     private MudDataGrid<License> _dataGrid = null!;
     private List<License> licenses = new();
+    private Dictionary<long, DateTimeOffset> lastVerifiedByLicenseId = new();
 
     protected override async Task OnInitializedAsync()
     {
         licenses = await DbContext.Licenses.AsNoTracking().OrderBy(l => l.Label).ToListAsync();
+
+        // One aggregate query for the whole grid rather than N+1 per-row lookups — the
+        // verify API is the highest-traffic path in the app, so this table can grow far
+        // faster than the license list itself.
+        lastVerifiedByLicenseId = await DbContext.LicenseVerificationEvents
+            .AsNoTracking()
+            .GroupBy(e => e.LicenseId)
+            .Select(g => new { LicenseId = g.Key, LastOccurredAtUtc = g.Max(e => e.OccurredAtUtc) })
+            .ToDictionaryAsync(x => x.LicenseId, x => x.LastOccurredAtUtc);
     }
 
     // Priority order (not alphabetical/enum declaration order) — an admin sorting by
